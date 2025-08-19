@@ -8,7 +8,12 @@
 </head>
 <body>
   <h1>Conscious YouTube</h1>
-  <button id="action-btn">Do Something</button>
-  <script src="popup.js"></script>
+  <div>
+    <input type="text" id="topic-input" placeholder="Enter topic to exclude" />
+    <button id="add-topic-btn">Add</button>
+  </div>
+  <div id="error-msg" style="color: #c00; margin-top: 8px;"></div>
+  <ul id="topic-list"></ul>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>

@@ -11,5 +11,6 @@ Only one persona - user
 
 ## User stories
 * As a user, I should be able to save, edit and remove the topics that I don't want to see in the youtube recommendations, so that when I load the youtube in the browser later on, the plugin is able to exclude the videos that belong to these topics.
-* As a user, when I open the homepage of youtube, the videos that belong to the excluded list of topics, do not appear in the feed.
-
+Following is the intended behavior
+    * Upon addition of a topic name, it gets saved in the local storage of chrome and immediately appears in the list in UI as well
+    * User should not be able to add blank or duplicate topic names. Appropriate message should appear. Case of the input and whitespaces should not matter while checking for duplicates
