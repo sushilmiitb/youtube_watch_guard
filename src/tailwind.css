@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional small base adjustments for the popup */
+body {
+	@apply min-w-72;
+}

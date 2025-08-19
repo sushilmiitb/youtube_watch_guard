@@ -1,20 +1,25 @@
-import { normalize, addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
+import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
 import { getElements, setError, clearError, setInput, getInput, renderTopics } from './popupView.js';
 
 async function bootstrap() {
   const els = getElements();
   let topics = await loadTopics();
+  let editingIndex = null;
 
   const handlers = {
-    onEdit: async (index, current) => {
+    onStartEdit: (index) => {
       clearError();
-      const updated = window.prompt('Edit topic', current);
-      if (updated == null) return; // cancel
+      editingIndex = index;
+      renderTopics(topics, { ...handlers, editingIndex });
+    },
+    onConfirmEdit: async (index, updated) => {
+      clearError();
       try {
         const next = editTopic(topics, index, updated);
         topics = next;
         await saveTopics(topics);
-        renderTopics(topics, handlers);
+        editingIndex = null;
+        renderTopics(topics, { ...handlers, editingIndex });
       } catch (msg) {
         setError(String(msg));
       }
@@ -24,25 +29,35 @@ async function bootstrap() {
       const next = removeTopic(topics, index);
       topics = next;
       await saveTopics(topics);
-      renderTopics(topics, handlers);
+      renderTopics(topics, { ...handlers, editingIndex });
     }
   };
 
-  els.addBtn.addEventListener('click', async () => {
+  async function handleAdd() {
     clearError();
     const raw = getInput();
     try {
       const next = addTopic(topics, raw);
       topics = next;
       await saveTopics(topics);
-      renderTopics(topics, handlers);
+      renderTopics(topics, { ...handlers, editingIndex });
       setInput('');
     } catch (msg) {
       setError(String(msg));
     }
-  });
+  }
 
-  renderTopics(topics, handlers);
+  els.addBtn.addEventListener('click', handleAdd);
+  if (els.input) {
+    els.input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAdd();
+      }
+    });
+  }
+
+  renderTopics(topics, { ...handlers, editingIndex });
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);

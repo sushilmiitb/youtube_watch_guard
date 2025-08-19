@@ -1,0 +1,21 @@
+{
+  "name": "conscious_youtube",
+  "version": "1.0.0",
+  "description": "A Chrome extension to enhance your YouTube experience consciously.",
+  "scripts": {
+    "test": "jest",
+    "build:css": "tailwindcss -i src/tailwind.css -o popup.css --minify",
+    "dev:css": "tailwindcss -i src/tailwind.css -o popup.css -w"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.25.4",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^22.1.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "daisyui": "^4.12.14"
+  }
+}
