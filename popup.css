@@ -1,0 +1,25 @@
+body {
+  min-width: 200px;
+  min-height: 120px;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #222;
+  margin: 0;
+  padding: 16px;
+}
+h1 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+button {
+  padding: 8px 16px;
+  font-size: 16px;
+  background: #c4302b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover {
+  background: #a72822;
+}

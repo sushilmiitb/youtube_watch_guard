@@ -1,0 +1,24 @@
+# macOS system files
+.DS_Store
+
+# Node modules (if you add npm packages in the future)
+node_modules/
+
+# Log files
+*.log
+
+# VSCode settings
+.vscode/
+
+# Build output (if any)
+dist/
+build/
+
+# Extension package files (if you ever zip for upload)
+*.zip
+
+# Ignore placeholder icons if you plan to replace them
+# icon16.png
+# icon32.png
+# icon48.png
+# icon128.png
