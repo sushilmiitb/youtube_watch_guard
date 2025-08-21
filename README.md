@@ -39,6 +39,9 @@ Use the sensitivity slider to control how strict the filtering should be (not ac
 - **Lower values (0-30%)**: Only hide videos that are very similar to excluded topics
 - **Higher values (70-100%)**: Hide videos that are even remotely related to excluded topics
 
+### 4. Run the embeddings service
+https://github.com/sushilmiitb/genai_inference_apis_self_hosted
+
 ## How It Works (Test Mode)
 
 1. **Content Analysis**: When you visit YouTube, the extension analyzes video titles on the page
