@@ -117,7 +117,7 @@ function hideVideo(videoElement) {
   logger.debug('hideVideo called for element:', videoElement, '| Title:', title);
   if (videoElement && !videoElement.classList.contains('conscious-youtube-hidden')) {
     videoElement.classList.add('conscious-youtube-hidden');
-    videoElement.style.opacity = '0.5';
+    videoElement.style.opacity = '0.4';
     videoElement.style.pointerEvents = 'none';
     
     // Add a subtle indicator
