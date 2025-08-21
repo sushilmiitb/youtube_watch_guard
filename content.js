@@ -13,6 +13,8 @@ let isScanning = false;
 let scanTimeout = null;
 let embeddingApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
+// Import the embedding similarity function
+let calculateTopicSimilarity;
 
 async function ensureEmbeddingApi() {
   if (embeddingApi) return embeddingApi;
@@ -21,6 +23,7 @@ async function ensureEmbeddingApi() {
   const url = chrome.runtime.getURL('src/embeddingUtils.js');
   if (!url) throw new Error('Embedding module URL unavailable');
   embeddingApi = await import(url);
+  calculateTopicSimilarity = embeddingApi.calculateTopicSimilarity;
   return embeddingApi;
 }
 
@@ -73,21 +76,31 @@ function extractVideoTitle(videoElement) {
 
 /**
  * Determines if a video should be hidden based on its semantic similarity to excluded topics.
- * TEST MODE: Always returns true to test DOM manipulation and prints video titles to console.
+ * Calls calculateTopicSimilarity for each topic and hides if any are above the threshold.
  * @param {string} videoTitle - The title of the YouTube video to evaluate.
  * @param {string[]} [topics] - An array of excluded topics to check against. Defaults to the globally loaded `excludedTopics`.
  * @param {number} [threshold] - The sensitivity threshold (0-1) for hiding. Defaults to the globally loaded `sensitivity`.
- * @returns {Promise<boolean>} - Always returns true in test mode.
+ * @returns {Promise<boolean>} - True if the video should be hidden.
  */
 async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = sensitivity) {
   if (!videoTitle) {
     return false;
   }
-
-  // TEST MODE: Hide videos 50% of the time and print titles to console
-  const shouldHide = Math.random() < 0.8;
-  console.log(`TEST MODE: ${shouldHide ? 'Hiding' : 'Showing'} video - "${videoTitle}"`);
-  return shouldHide;
+  if (!calculateTopicSimilarity) {
+    await ensureEmbeddingApi();
+  }
+  for (const topic of topics) {
+    try {
+      const similarity = await calculateTopicSimilarity(topic, videoTitle);
+      // console.log(`[ConsciousYouTube] Title: "${videoTitle}" | Topic: "${topic}" | Similarity: ${similarity}`);
+      if (similarity >= threshold) {
+        return true;
+      }
+    } catch (e) {
+      console.error('Error in similarity check:', e);
+    }
+  }
+  return false;
 }
 
 /**
@@ -143,7 +156,7 @@ function showVideo(videoElement) {
  */
 function clearProcessedVideosCache() {
   processedVideos = new WeakSet();
-  console.log('Conscious YouTube: Cleared processed videos cache');
+  console.info('Conscious YouTube: Cleared processed videos cache');
 }
 
 /**
@@ -196,7 +209,7 @@ async function scanForVideos() {
 
     // Log processing summary
     if (processedCount > 0) {
-      console.log(`Conscious YouTube: Processed ${processedCount} new videos`);
+      console.info(`Conscious YouTube: Processed ${processedCount} new videos`);
     }
   } catch (error) {
     console.error('Error scanning for videos:', error);
@@ -219,7 +232,7 @@ function debouncedScan() {
  * Initialize the content script
  */
 async function initialize() {
-  console.log('Conscious YouTube: Content script initializing');
+  console.info('Conscious YouTube: Content script initializing');
 
   // Ensure embedding API is available before scanning
   await ensureEmbeddingApi();
@@ -233,7 +246,7 @@ async function initialize() {
       loadSettings().then(() => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
-        console.log('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
+        console.info('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
         // Re-scan when settings change
         debouncedScan();
       });
@@ -246,7 +259,7 @@ async function initialize() {
     if (window.location.href !== currentUrl) {
       currentUrl = window.location.href;
       clearProcessedVideosCache();
-      console.log('Conscious YouTube: Page changed, clearing video cache');
+      console.info('Conscious YouTube: Page changed, clearing video cache');
       // Small delay to let the new page load
       setTimeout(debouncedScan, 500);
     }

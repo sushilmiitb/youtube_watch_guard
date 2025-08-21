@@ -29,3 +29,9 @@ Please make the following changes
 I have tried implementing the popup and dom manipulator. I have tested popup, but the DOM manipulator still needs to be tested. I have tried to implement client side transformer for semantic analysis but that didn’t work. Now I have to implement server side. I can do that in two ways - one build huggingface embedded model at my end in a server and expose that to the client or use openAI API. I think I will do the second one first because that will allow me to use this plugin by default for free in localhost.
 
 I want to implement embeddings by implementing huggingface embeding model locally. So, I want to do away with OpenAI calling part in the code. Also, I want to first test the DOM manipulator functionality before building API calling functionality. So, for now, let's not build the embedded vector calling part. Let's just filter out the videos always and as we filter out a video, print in the console the video title.
+
+## Implement embeddings API
+Let's now implement the api call to get embeddings. Following are the instructions:
+* The URL of the server is: http://127.0.0.1:8000/, but make it configurable
+* Documentation is here: http://127.0.0.1:8000/docs
+* 

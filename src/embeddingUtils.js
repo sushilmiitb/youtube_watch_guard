@@ -1,6 +1,8 @@
 // Embedding utilities for semantic similarity
 // TEST MODE: Always returns high similarity to test DOM manipulation
 
+import { API_URL, MODEL_NAME, MOCK_EMBEDDING_API_CALL } from './embeddingConfig.js';
+
 /**
  * Calculate the cosine similarity between two equal-length numeric vectors.
  * When to use: any time you need a similarity score between two embeddings.
@@ -29,37 +31,64 @@ export function cosineSimilarity(vectorA, vectorB) {
 }
 
 /**
- * TEST MODE: Get a mock embedding for testing DOM manipulation.
- * This function returns a consistent mock embedding to test the video hiding functionality
- * without requiring actual embeddings or API calls.
+ * Get an embedding for the given text from the backend API, or mock if test mode is on.
  * @param {string} text Input text
- * @returns {Promise<number[]>} Mock embedding vector
+ * @returns {Promise<number[]>} Embedding vector
  */
 export async function getEmbedding(text) {
   if (!text || typeof text !== 'string') {
     throw new Error('Text must be a non-empty string');
   }
-  
-  // Return a mock embedding (384-dimensional vector with small random values)
-  // This is the same dimension as the paraphrase-multilingual-MiniLM-L12-v2 model
-  const mockEmbedding = new Array(384).fill(0).map(() => (Math.random() - 0.5) * 0.1);
-  return mockEmbedding;
+  if (MOCK_EMBEDDING_API_CALL) {
+    // Return a mock embedding (384-dimensional vector with small random values)
+    return new Array(384).fill(0).map(() => (Math.random() - 0.5) * 0.1);
+  }
+  try {
+    const response = await fetch(`${API_URL}/embeddings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text, model_name: MODEL_NAME }),
+    });
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    const data = await response.json();
+    if (!data.embeddings || !Array.isArray(data.embeddings)) {
+      throw new Error('Invalid embedding response');
+    }
+    return data.embeddings;
+  } catch (error) {
+    console.error('Error fetching embedding:', error);
+    throw error;
+  }
 }
 
 /**
- * TEST MODE: Always returns a high similarity score to test video hiding.
- * This function simulates semantic similarity calculation but always returns
- * a value above the threshold to ensure videos are hidden for testing purposes.
+ * Calculate the semantic similarity between a topic and a video title using embeddings, or mock if test mode is on.
  * @param {string} topic The excluded topic/category
  * @param {string} videoTitle The YouTube video title to evaluate
- * @returns {Promise<number>} Always returns 0.8 (high similarity for testing)
+ * @returns {Promise<number>} Cosine similarity between topic and video title, or 0.9 if mock mode (90% hide)
  */
 export async function calculateTopicSimilarity(topic, videoTitle) {
   if (!topic || !videoTitle) {
     throw new Error('Topic and video title must be provided');
   }
-  
-  // TEST MODE: Always return high similarity to test DOM manipulation
-  console.log(`TEST MODE: Simulating high similarity between topic "${topic}" and video "${videoTitle}"`);
-  return 0.8; // High similarity score to ensure videos are hidden
+  if (MOCK_EMBEDDING_API_CALL) {
+    // 90% probability to hide video (return high similarity)
+    const shouldHide = Math.random() < 0.9;
+    console.log(`MOCK MODE: ${shouldHide ? 'Hiding' : 'Showing'} video - topic: "${topic}", title: "${videoTitle}"`);
+    return shouldHide ? 0.9 : 0.1;
+  }
+  try {
+    const [topicEmbedding, videoEmbedding] = await Promise.all([
+      getEmbedding(topic),
+      getEmbedding(videoTitle),
+    ]);
+    return cosineSimilarity(topicEmbedding, videoEmbedding);
+  } catch (error) {
+    console.error('Error calculating similarity:', error);
+    return 0; // Fallback: treat as not similar
+  }
 }

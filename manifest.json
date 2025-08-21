@@ -20,7 +20,9 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "src/embeddingUtils.js"
+        "src/embeddingUtils.js",
+        "src/embeddingConfig.js",
+        "src/logger.js"
       ],
       "matches": ["https://www.youtube.com/*"]
     }
