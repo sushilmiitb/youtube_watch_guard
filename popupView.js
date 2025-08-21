@@ -4,7 +4,9 @@ export function getElements() {
     input: document.getElementById('topic-input'),
     addBtn: document.getElementById('add-topic-btn'),
     list: document.getElementById('topic-list'),
-    error: document.getElementById('error-msg')
+    error: document.getElementById('error-msg'),
+    sensitivitySlider: document.getElementById('sensitivity-slider'),
+    sensitivityValue: document.getElementById('sensitivity-value')
   };
 }
 
@@ -25,6 +27,23 @@ export function setInput(value) {
 export function getInput() {
   const { input } = getElements();
   return input ? input.value : '';
+}
+
+export function getSensitivity() {
+  const { sensitivitySlider } = getElements();
+  if (sensitivitySlider) {
+    return parseInt(sensitivitySlider.value) / 100; // Convert percentage to decimal
+  }
+  return 0.3; // Default 30%
+}
+
+export function setSensitivity(value) {
+  const { sensitivitySlider, sensitivityValue } = getElements();
+  if (sensitivitySlider && sensitivityValue) {
+    const percentage = Math.round(value * 100);
+    sensitivitySlider.value = percentage;
+    sensitivityValue.textContent = `${percentage}%`;
+  }
 }
 
 export function renderTopics(topics, { editingIndex = null, onStartEdit, onConfirmEdit, onRemove }) {
@@ -65,7 +84,7 @@ export function renderTopics(topics, { editingIndex = null, onStartEdit, onConfi
       label.textContent = t;
 
       const controls = document.createElement('div');
-      controls.className = 'flex gap-2';
+      controls.className = 'flex gap-1';
 
       const editBtn = document.createElement('button');
       editBtn.className = 'btn btn-xs btn-ghost text-primary';

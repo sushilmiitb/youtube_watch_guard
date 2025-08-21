@@ -29,14 +29,14 @@ test('setInput and getInput round-trip', () => {
 });
 
 test('renderTopics populates list and wires callbacks', () => {
-  const onEdit = jest.fn();
+  const onStartEdit = jest.fn();
   const onRemove = jest.fn();
-  renderTopics(['a', 'b'], { onEdit, onRemove });
+  renderTopics(['a', 'b'], { onStartEdit, onRemove });
   const items = [...document.querySelectorAll('#topic-list li')];
   expect(items.length).toBe(2);
   // Click edit and remove on first item
   items[0].querySelector('button').click();
-  expect(onEdit).toHaveBeenCalledWith(0, 'a');
+  expect(onStartEdit).toHaveBeenCalledWith(0);
   items[0].querySelectorAll('button')[1].click();
   expect(onRemove).toHaveBeenCalledWith(0);
 });
