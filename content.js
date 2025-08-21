@@ -15,6 +15,7 @@ let embeddingApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
 // Import the embedding similarity function
 let calculateTopicSimilarity;
+import logger from './src/logger.js';
 
 async function ensureEmbeddingApi() {
   if (embeddingApi) return embeddingApi;
@@ -36,7 +37,7 @@ async function loadSettings() {
     excludedTopics = result.topics || [];
     sensitivity = result.sensitivity || DEFAULT_SENSITIVITY;
   } catch (error) {
-    console.error('Failed to load settings:', error);
+    logger.error('Failed to load settings:', error);
   }
 }
 
@@ -69,7 +70,7 @@ function extractVideoTitle(videoElement) {
     }
     return null;
   } catch (error) {
-    console.error('Error extracting video title:', error);
+    logger.error('Error extracting video title:', error);
     return null;
   }
 }
@@ -92,12 +93,12 @@ async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = 
   for (const topic of topics) {
     try {
       const similarity = await calculateTopicSimilarity(topic, videoTitle);
-      // console.log(`[ConsciousYouTube] Title: "${videoTitle}" | Topic: "${topic}" | Similarity: ${similarity}`);
+      logger.debug(`[ConsciousYouTube] Title: "${videoTitle}" | Topic: "${topic}" | Similarity: ${similarity}`);
       if (similarity >= threshold) {
         return true;
       }
     } catch (e) {
-      console.error('Error in similarity check:', e);
+      logger.error('Error in similarity check:', e);
     }
   }
   return false;
@@ -156,7 +157,7 @@ function showVideo(videoElement) {
  */
 function clearProcessedVideosCache() {
   processedVideos = new WeakSet();
-  console.info('Conscious YouTube: Cleared processed videos cache');
+  logger.info('Conscious YouTube: Cleared processed videos cache');
 }
 
 /**
@@ -209,10 +210,10 @@ async function scanForVideos() {
 
     // Log processing summary
     if (processedCount > 0) {
-      console.info(`Conscious YouTube: Processed ${processedCount} new videos`);
+      logger.info(`Conscious YouTube: Processed ${processedCount} new videos`);
     }
   } catch (error) {
-    console.error('Error scanning for videos:', error);
+    logger.error('Error scanning for videos:', error);
   } finally {
     isScanning = false;
   }
@@ -232,7 +233,7 @@ function debouncedScan() {
  * Initialize the content script
  */
 async function initialize() {
-  console.info('Conscious YouTube: Content script initializing');
+  logger.info('Conscious YouTube: Content script initializing');
 
   // Ensure embedding API is available before scanning
   await ensureEmbeddingApi();
@@ -246,7 +247,7 @@ async function initialize() {
       loadSettings().then(() => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
-        console.info('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
+        logger.info('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
         // Re-scan when settings change
         debouncedScan();
       });
@@ -259,7 +260,7 @@ async function initialize() {
     if (window.location.href !== currentUrl) {
       currentUrl = window.location.href;
       clearProcessedVideosCache();
-      console.info('Conscious YouTube: Page changed, clearing video cache');
+      logger.info('Conscious YouTube: Page changed, clearing video cache');
       // Small delay to let the new page load
       setTimeout(debouncedScan, 500);
     }
@@ -318,10 +319,10 @@ async function initialize() {
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      initialize().catch((e) => console.error(e));
+      initialize().catch((e) => logger.error(e));
     });
   } else {
-    initialize().catch((e) => console.error(e));
+    initialize().catch((e) => logger.error(e));
   }
 }
 

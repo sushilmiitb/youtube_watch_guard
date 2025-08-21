@@ -2,6 +2,7 @@
 // TEST MODE: Always returns high similarity to test DOM manipulation
 
 import { API_URL, MODEL_NAME, MOCK_EMBEDDING_API_CALL } from './embeddingConfig.js';
+import logger from './logger.js';
 
 /**
  * Calculate the cosine similarity between two equal-length numeric vectors.
@@ -60,7 +61,7 @@ export async function getEmbedding(text) {
     }
     return data.embeddings;
   } catch (error) {
-    console.error('Error fetching embedding:', error);
+    logger.error('Error fetching embedding:', error);
     throw error;
   }
 }
@@ -78,7 +79,7 @@ export async function calculateTopicSimilarity(topic, videoTitle) {
   if (MOCK_EMBEDDING_API_CALL) {
     // 90% probability to hide video (return high similarity)
     const shouldHide = Math.random() < 0.9;
-    console.log(`MOCK MODE: ${shouldHide ? 'Hiding' : 'Showing'} video - topic: "${topic}", title: "${videoTitle}"`);
+    logger.debug(`MOCK MODE: ${shouldHide ? 'Hiding' : 'Showing'} video - topic: "${topic}", title: "${videoTitle}"`);
     return shouldHide ? 0.9 : 0.1;
   }
   try {
@@ -88,7 +89,7 @@ export async function calculateTopicSimilarity(topic, videoTitle) {
     ]);
     return cosineSimilarity(topicEmbedding, videoEmbedding);
   } catch (error) {
-    console.error('Error calculating similarity:', error);
+    logger.error('Error calculating similarity:', error);
     return 0; // Fallback: treat as not similar
   }
 }

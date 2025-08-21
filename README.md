@@ -90,6 +90,20 @@ npm run build:css
 npm run dev:css
 ```
 
+### Building Content Script
+
+```bash
+npm run build:content
+```
+
+This bundles the content script and its dependencies for use in the extension. For development, you can use:
+
+```bash
+npm run dev:content
+```
+
+This will watch for changes and automatically rebuild the bundle.
+
 ## Technical Details
 
 - **Current Mode**: Test mode with mock embeddings

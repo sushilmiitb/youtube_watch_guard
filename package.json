@@ -5,7 +5,9 @@
   "scripts": {
     "build:css": "tailwindcss -i src/tailwind.css -o popup.css --minify",
     "dev:css": "tailwindcss -i src/tailwind.css -o popup.css --watch",
-    "test": "jest"
+    "test": "jest",
+    "build:content": "esbuild content.js --bundle --outfile=dist/content.bundle.js --format=iife",
+    "dev:content": "esbuild content.js --bundle --outfile=dist/content.bundle.js --format=iife --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
