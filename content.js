@@ -119,21 +119,21 @@ function hideVideo(videoElement) {
     videoElement.classList.add('conscious-youtube-hidden');
     videoElement.style.opacity = '0.4';
     videoElement.style.pointerEvents = 'none';
-    
-    // Add a subtle indicator
+    // Add the indicator
     const indicator = document.createElement('div');
     indicator.className = 'conscious-youtube-indicator';
     indicator.textContent = 'Hidden';
     indicator.style.cssText = `
       position: absolute;
       top: 5px;
-      right: 5px;
-      background: rgba(255, 0, 0, 0.8);
+      left: 5px;
+      background: rgba(255, 0, 0, 1.0);
       color: white;
       padding: 2px 6px;
       border-radius: 3px;
       font-size: 10px;
       z-index: 1000;
+      pointer-events: none;
     `;
     videoElement.style.position = 'relative';
     videoElement.appendChild(indicator);
@@ -149,11 +149,9 @@ function showVideo(videoElement) {
     videoElement.classList.remove('conscious-youtube-hidden');
     videoElement.style.opacity = '';
     videoElement.style.pointerEvents = '';
-    
+    // Remove indicator
     const indicator = videoElement.querySelector('.conscious-youtube-indicator');
-    if (indicator) {
-      indicator.remove();
-    }
+    if (indicator) indicator.remove();
   }
 }
 
