@@ -7,6 +7,32 @@ async function bootstrap() {
   let topics = await loadTopics();
   let editingIndex = null;
 
+  // Load video action (hide/delete) from storage and set radio button
+  let videoAction = 'hide';
+  try {
+    const result = await chrome.storage.local.get(['videoAction']);
+    videoAction = result.videoAction || 'hide';
+  } catch (error) {
+    console.error('Failed to load video action:', error);
+  }
+  // Set radio button state
+  const hideRadio = document.getElementById('action-hide');
+  const deleteRadio = document.getElementById('action-delete');
+  if (hideRadio && deleteRadio) {
+    hideRadio.checked = videoAction === 'hide';
+    deleteRadio.checked = videoAction === 'delete';
+    hideRadio.addEventListener('change', async () => {
+      if (hideRadio.checked) {
+        await chrome.storage.local.set({ videoAction: 'hide' });
+      }
+    });
+    deleteRadio.addEventListener('change', async () => {
+      if (deleteRadio.checked) {
+        await chrome.storage.local.set({ videoAction: 'delete' });
+      }
+    });
+  }
+
   // Load sensitivity from storage
   try {
     const result = await chrome.storage.local.get(['sensitivity']);

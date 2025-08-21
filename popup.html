@@ -19,6 +19,21 @@
     <ul id="topic-list" class="mt-3 space-y-2"></ul>
   </div>
 
+  <!-- Video Action Configuration Section -->
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-2">When a video matches an excluded topic:</label>
+    <div class="flex gap-4">
+      <label class="flex items-center gap-1">
+        <input type="radio" name="video-action" id="action-hide" value="hide" class="radio radio-sm" checked />
+        <span>Hide</span>
+      </label>
+      <label class="flex items-center gap-1">
+        <input type="radio" name="video-action" id="action-delete" value="delete" class="radio radio-sm" />
+        <span>Delete</span>
+      </label>
+    </div>
+  </div>
+
   <!-- Sensitivity Control Section -->
   <div class="border-t pt-4">
     <label for="sensitivity-slider" class="block text-sm font-medium mb-2">

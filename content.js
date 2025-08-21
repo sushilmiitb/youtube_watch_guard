@@ -13,6 +13,7 @@ let isScanning = false;
 let scanTimeout = null;
 let embeddingApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
+let videoAction = 'hide'; // 'hide' or 'delete'
 // Import the embedding similarity function
 let calculateTopicSimilarity;
 import logger from './src/logger.js';
@@ -33,9 +34,10 @@ async function ensureEmbeddingApi() {
  */
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(['topics', 'sensitivity']);
+    const result = await chrome.storage.local.get(['topics', 'sensitivity', 'videoAction']);
     excludedTopics = result.topics || [];
     sensitivity = result.sensitivity || DEFAULT_SENSITIVITY;
+    videoAction = result.videoAction || 'hide';
   } catch (error) {
     logger.error('Failed to load settings:', error);
   }
@@ -161,6 +163,17 @@ function clearProcessedVideosCache() {
 }
 
 /**
+ * Delete a video element from the DOM
+ * @param {Element} videoElement - The video element to delete
+ */
+function deleteVideo(videoElement) {
+  if (videoElement && videoElement.parentNode) {
+    videoElement.parentNode.removeChild(videoElement);
+    logger.info('Conscious YouTube: Deleted video element');
+  }
+}
+
+/**
  * Scan the page for video elements and process them
  * Only processes video elements that haven't been processed before
  */
@@ -197,7 +210,11 @@ async function scanForVideos() {
         const shouldHide = await shouldHideVideo(title);
         
         if (shouldHide) {
-          hideVideo(videoElement);
+          if (videoAction === 'delete') {
+            deleteVideo(videoElement);
+          } else {
+            hideVideo(videoElement);
+          }
         } else {
           showVideo(videoElement);
         }
@@ -243,7 +260,7 @@ async function initialize() {
   
   // Set up storage change listener
   chrome.storage.onChanged.addListener((changes) => {
-    if (changes.topics || changes.sensitivity) {
+    if (changes.topics || changes.sensitivity || changes.videoAction) {
       loadSettings().then(() => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
@@ -333,6 +350,7 @@ if (typeof module !== 'undefined' && module.exports) {
     shouldHideVideo, 
     hideVideo, 
     showVideo,
-    clearProcessedVideosCache
+    clearProcessedVideosCache,
+    deleteVideo
   };
 }
