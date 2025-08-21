@@ -43,6 +43,22 @@ async function bootstrap() {
     setSensitivity(0.3); // Default
   }
 
+  // Load Shorts section removal setting from storage and set checkbox
+  let removeShortsSection = false;
+  try {
+    const result = await chrome.storage.local.get(['removeShortsSection']);
+    removeShortsSection = !!result.removeShortsSection;
+  } catch (error) {
+    console.error('Failed to load Shorts section removal setting:', error);
+  }
+  const shortsCheckbox = document.getElementById('remove-shorts-section');
+  if (shortsCheckbox) {
+    shortsCheckbox.checked = removeShortsSection;
+    shortsCheckbox.addEventListener('change', async () => {
+      await chrome.storage.local.set({ removeShortsSection: shortsCheckbox.checked });
+    });
+  }
+
   // Dynamically show test mode indicator if needed
   if (MOCK_EMBEDDING_API_CALL) {
     const warning = document.createElement('div');

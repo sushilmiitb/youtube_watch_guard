@@ -3,7 +3,7 @@
 
 // Configuration
 const DEFAULT_SENSITIVITY = 0.3; // 30% default threshold
-const SCAN_INTERVAL = 1000; // Scan every 1 second
+const SCAN_INTERVAL = 5000; // Scan every 1 second
 const DEBOUNCE_DELAY = 250; // Debounce DOM changes
 
 // State management
@@ -14,6 +14,7 @@ let scanTimeout = null;
 let embeddingApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
 let videoAction = 'hide'; // 'hide' or 'delete'
+let removeShortsSection = false;
 // Import the embedding similarity function
 let calculateTopicSimilarity;
 import logger from './src/logger.js';
@@ -34,10 +35,11 @@ async function ensureEmbeddingApi() {
  */
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(['topics', 'sensitivity', 'videoAction']);
+    const result = await chrome.storage.local.get(['topics', 'sensitivity', 'videoAction', 'removeShortsSection']);
     excludedTopics = result.topics || [];
     sensitivity = result.sensitivity || DEFAULT_SENSITIVITY;
     videoAction = result.videoAction || 'hide';
+    removeShortsSection = !!result.removeShortsSection;
   } catch (error) {
     logger.error('Failed to load settings:', error);
   }
@@ -111,9 +113,11 @@ async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = 
  * @param {Element} videoElement - The video element to hide
  */
 function hideVideo(videoElement) {
+  const title = extractVideoTitle(videoElement);
+  logger.debug('hideVideo called for element:', videoElement, '| Title:', title);
   if (videoElement && !videoElement.classList.contains('conscious-youtube-hidden')) {
     videoElement.classList.add('conscious-youtube-hidden');
-    videoElement.style.opacity = '0.25';
+    videoElement.style.opacity = '0.5';
     videoElement.style.pointerEvents = 'none';
     
     // Add a subtle indicator
@@ -174,6 +178,43 @@ function deleteVideo(videoElement) {
 }
 
 /**
+ * Remove Shorts sections from the DOM if enabled
+ */
+function removeShortsSectionsFromDOM() {
+  const selectors = [
+    'ytd-rich-section-renderer',
+    'ytd-reel-shelf-renderer'
+  ];
+  let removedCount = 0;
+  for (const selector of selectors) {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(el => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+        removedCount++;
+      }
+    });
+  }
+  if (removedCount > 0) {
+    logger.info(`Conscious YouTube: Removed ${removedCount} Shorts section(s)`);
+  }
+}
+
+function getVideoSelectorsForPage() {
+  const url = window.location.href;
+  if (/youtube\.com\/(results|search)/.test(url)) {
+    // Search page
+    return ['ytd-video-renderer', 'ytd-compact-video-renderer'];
+  } else if (/youtube\.com\/watch/.test(url)) {
+    // Watch/view page
+    return ['ytm-shorts-lockup-view-model-v2', 'yt-lockup-view-model'];
+  } else {
+    // Homepage (default)
+    return ['ytd-rich-item-renderer'];
+  }
+}
+
+/**
  * Scan the page for video elements and process them
  * Only processes video elements that haven't been processed before
  */
@@ -182,15 +223,12 @@ async function scanForVideos() {
   isScanning = true;
 
   try {
-    // Find all video containers
-    const videoSelectors = [
-      'ytd-rich-item-renderer', //Long form videos and shorts on homepage/feed
-      'ytd-video-renderer', // Long form video results in search
-      'ytd-compact-video-renderer', //Some type of videos in the search results
-      'ytm-shorts-lockup-view-model', //Shorts on the search results and view page
-      'yt-lockup-view-model', // Long form videos on the view page
-    ];
-
+    // Remove Shorts sections if enabled
+    if (removeShortsSection) {
+      removeShortsSectionsFromDOM();
+    }
+    // Find all video containers for the current page type
+    const videoSelectors = getVideoSelectorsForPage();
     let videoElements = [];
     for (const selector of videoSelectors) {
       const elements = document.querySelectorAll(selector);
@@ -260,7 +298,7 @@ async function initialize() {
   
   // Set up storage change listener
   chrome.storage.onChanged.addListener((changes) => {
-    if (changes.topics || changes.sensitivity || changes.videoAction) {
+    if (changes.topics || changes.sensitivity || changes.videoAction || changes.removeShortsSection) {
       loadSettings().then(() => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
