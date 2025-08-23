@@ -34,4 +34,4 @@ I want to implement embeddings by implementing huggingface embeding model locall
 Let's now implement the api call to get embeddings. Following are the instructions:
 * The URL of the server is: http://127.0.0.1:8000/, but make it configurable
 * Documentation is here: http://127.0.0.1:8000/docs
-* 
+* We will use this model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2, but make it configurable at project level

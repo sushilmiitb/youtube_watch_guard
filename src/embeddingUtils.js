@@ -67,6 +67,41 @@ export async function getEmbedding(text) {
 }
 
 /**
+ * Get embeddings for a batch of texts from the backend API.
+ * @param {string[]} texts - Array of input texts (e.g., video titles)
+ * @returns {Promise<number[][]>} Array of embedding vectors, in the same order as input texts
+ */
+export async function getBatchEmbeddings(texts) {
+  if (!Array.isArray(texts) || texts.length === 0) {
+    throw new Error('Texts must be a non-empty array');
+  }
+  if (MOCK_EMBEDDING_API_CALL) {
+    // Return mock embeddings (384-dim vectors with small random values)
+    return texts.map(() => new Array(384).fill(0).map(() => (Math.random() - 0.5) * 0.1));
+  }
+  try {
+    const response = await fetch(`${API_URL}/batch-embeddings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ texts, model_name: MODEL_NAME }),
+    });
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    const data = await response.json();
+    if (!data.embeddings || !Array.isArray(data.embeddings)) {
+      throw new Error('Invalid batch embedding response');
+    }
+    return data.embeddings;
+  } catch (error) {
+    logger.error('Error fetching batch embeddings:', error);
+    throw error;
+  }
+}
+
+/**
  * Calculate the semantic similarity between a topic and a video title using embeddings, or mock if test mode is on.
  * @param {string} topic The excluded topic/category
  * @param {string} videoTitle The YouTube video title to evaluate

@@ -213,6 +213,26 @@ function getVideoSelectorsForPage() {
 }
 
 /**
+ * Fetch and store embeddings for all excluded topics.
+ * Called at initialization and whenever topics change.
+ */
+async function updateTopicEmbeddings() {
+  if (!embeddingApi) await ensureEmbeddingApi();
+  const { getBatchEmbeddings } = embeddingApi;
+  if (excludedTopics.length > 0) {
+    try {
+      topicEmbeddings = await getBatchEmbeddings(excludedTopics);
+      logger.info('Fetched topic embeddings for current topics.');
+    } catch (error) {
+      logger.error('Failed to fetch topic embeddings:', error);
+      topicEmbeddings = [];
+    }
+  } else {
+    topicEmbeddings = [];
+  }
+}
+
+/**
  * Scan the page for video elements and process them
  * Only processes video elements that haven't been processed before
  */
@@ -233,18 +253,52 @@ async function scanForVideos() {
       videoElements.push(...Array.from(elements));
     }
 
-    // Process only unprocessed video elements
-    let processedCount = 0;
+    // Collect unprocessed video elements and their titles
+    let unprocessed = [];
     for (const videoElement of videoElements) {
-      // Skip if already processed
-      if (processedVideos.has(videoElement)) {
-        continue;
-      }
-
+      if (processedVideos.has(videoElement)) continue;
       const title = extractVideoTitle(videoElement);
       if (title) {
-        const shouldHide = await shouldHideVideo(title);
-        
+        unprocessed.push({ videoElement, title });
+      }
+    }
+
+    if (unprocessed.length > 0 && excludedTopics.length > 0 && topicEmbeddings.length === excludedTopics.length) {
+      if (!embeddingApi) await ensureEmbeddingApi();
+      const { getBatchEmbeddings, cosineSimilarity } = embeddingApi;
+      const titles = unprocessed.map(item => item.title);
+      let videoEmbeddings = [];
+      try {
+        // Batch fetch embeddings for all video titles
+        videoEmbeddings = await getBatchEmbeddings(titles);
+      } catch (error) {
+        logger.error('Batch embedding API failed:', error);
+        // Mark as processed to avoid retry loop
+        for (const { videoElement } of unprocessed) {
+          processedVideos.add(videoElement);
+        }
+        isScanning = false;
+        return;
+      }
+      // For each video, check similarity with each topic embedding
+      for (let i = 0; i < unprocessed.length; i++) {
+        const { videoElement, title } = unprocessed[i];
+        const videoEmbedding = videoEmbeddings[i];
+        let shouldHide = false;
+        for (let t = 0; t < excludedTopics.length; t++) {
+          const topic = excludedTopics[t];
+          const topicEmbedding = topicEmbeddings[t];
+          try {
+            const similarity = cosineSimilarity(topicEmbedding, videoEmbedding);
+            logger.debug(`[ConsciousYouTube] Title: "${title}" | Topic: "${topic}" | Similarity: ${similarity}`);
+            if (similarity >= sensitivity) {
+              shouldHide = true;
+              break;
+            }
+          } catch (e) {
+            logger.error('Error in similarity check:', e);
+          }
+        }
         if (shouldHide) {
           if (videoAction === 'delete') {
             deleteVideo(videoElement);
@@ -254,16 +308,9 @@ async function scanForVideos() {
         } else {
           showVideo(videoElement);
         }
-        
-        // Mark as processed
         processedVideos.add(videoElement);
-        processedCount++;
       }
-    }
-
-    // Log processing summary
-    if (processedCount > 0) {
-      logger.info(`Conscious YouTube: Processed ${processedCount} new videos`);
+      logger.info(`Conscious YouTube: Processed ${unprocessed.length} new videos (batched)`);
     }
   } catch (error) {
     logger.error('Error scanning for videos:', error);
@@ -293,13 +340,15 @@ async function initialize() {
   
   // Load initial settings
   await loadSettings();
+  await updateTopicEmbeddings();
   
   // Set up storage change listener
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.topics || changes.sensitivity || changes.videoAction || changes.removeShortsSection) {
-      loadSettings().then(() => {
+      loadSettings().then(async () => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
+        await updateTopicEmbeddings();
         logger.info('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
         // Re-scan when settings change
         debouncedScan();
