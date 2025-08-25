@@ -5,7 +5,7 @@
  * If false, real API calls are made for embeddings and similarity.
  */
 export const MOCK_EMBEDDING_API_CALL = false; // Set to false for production
-export const ENV = 'production';
+export const ENV = 'development';
 
 /**
  * The base URL of the backend embedding API server.
