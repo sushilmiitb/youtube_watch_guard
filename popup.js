@@ -1,11 +1,38 @@
 import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
-import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics } from './popupView.js';
+import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode } from './popupView.js';
 import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
 
 async function bootstrap() {
   const els = getElements();
   let topics = await loadTopics();
   let editingIndex = null;
+  let editMode = false;
+
+  // --- Topic Compact/Edit Mode Logic ---
+  function showCompactMode() {
+    setTopicEditMode(false);
+    renderTopicsCompact(topics);
+    editMode = false;
+  }
+  function showEditMode() {
+    setTopicEditMode(true);
+    renderTopics(topics, { ...handlers, editingIndex });
+    editMode = true;
+  }
+
+  // Wire up edit button
+  const editBtn = document.getElementById('topic-edit-btn');
+  if (editBtn) {
+    editBtn.addEventListener('click', showEditMode);
+  }
+  // Wire up done button in edit section
+  const doneBtn = document.getElementById('topic-edit-done-btn');
+  if (doneBtn) {
+    doneBtn.addEventListener('click', showCompactMode);
+  }
+
+  // Initial render: compact mode
+  showCompactMode();
 
   // Load video action (hide/delete) from storage and set radio button
   let videoAction = 'hide';
@@ -89,6 +116,8 @@ async function bootstrap() {
         await saveTopics(topics);
         editingIndex = null;
         renderTopics(topics, { ...handlers, editingIndex });
+        // Also update compact view
+        renderTopicsCompact(topics);
       } catch (msg) {
         setError(String(msg));
       }
@@ -99,6 +128,8 @@ async function bootstrap() {
       topics = next;
       await saveTopics(topics);
       renderTopics(topics, { ...handlers, editingIndex });
+      // Also update compact view
+      renderTopicsCompact(topics);
     }
   };
 
@@ -110,6 +141,7 @@ async function bootstrap() {
       topics = next;
       await saveTopics(topics);
       renderTopics(topics, { ...handlers, editingIndex });
+      renderTopicsCompact(topics);
       setInput('');
     } catch (msg) {
       setError(String(msg));

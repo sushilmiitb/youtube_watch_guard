@@ -107,3 +107,33 @@ export function renderTopics(topics, { editingIndex = null, onStartEdit, onConfi
     list.appendChild(li);
   });
 }
+
+/**
+ * Render the topics as a single comma-separated line in compact mode.
+ * @param {string[]} topics
+ */
+export function renderTopicsCompact(topics) {
+  const compactRow = document.getElementById('topic-compact-row');
+  const compactList = document.getElementById('topic-compact-list');
+  if (!compactRow || !compactList) return;
+  if (topics.length === 0) {
+    compactList.textContent = 'No topics added.';
+  } else {
+    compactList.textContent = topics.join(', ');
+  }
+  // Remove any truncation styling to ensure all topics are visible
+  compactList.classList.remove('truncate');
+}
+
+/**
+ * Show/hide the compact and edit sections.
+ * @param {boolean} editMode
+ */
+export function setTopicEditMode(editMode) {
+  const compactRow = document.getElementById('topic-compact-row');
+  const editSection = document.getElementById('topic-edit-section');
+  if (compactRow && editSection) {
+    compactRow.style.display = editMode ? 'none' : '';
+    editSection.style.display = editMode ? '' : 'none';
+  }
+}
