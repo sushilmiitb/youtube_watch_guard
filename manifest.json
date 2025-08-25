@@ -22,7 +22,8 @@
       "resources": [
         "src/embeddingUtils.js",
         "src/embeddingConfig.js",
-        "src/logger.js"
+        "src/logger.js",
+        "src/notInterestedActions.js"
       ],
       "matches": ["https://www.youtube.com/*"]
     }

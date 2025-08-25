@@ -356,6 +356,20 @@ async function initialize() {
     }
   });
 
+  // Set up message listener for Not Interested automation (from popup)
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message.action === 'markNotInterested') {
+        // Dynamically import and execute the action
+        import(chrome.runtime.getURL('src/notInterestedActions.js')).then(module => {
+          module.markVideosNotInterested(message.count || 10);
+        }).catch(err => {
+          logger.error('Failed to run Not Interested automation:', err);
+        });
+      }
+    });
+  }
+
   // Set up URL change listener for page navigation
   let currentUrl = window.location.href;
   const urlObserver = new MutationObserver(() => {

@@ -151,3 +151,20 @@ async function bootstrap() {
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);
+
+// --- Not Interested Button Integration ---
+const notInterestedBtn = document.getElementById('not-interested-btn');
+if (notInterestedBtn) {
+  notInterestedBtn.addEventListener('click', async () => {
+    const confirmed = confirm('Are you sure you want to mark the first 10 videos as Not Interested? This action cannot be undone.');
+    if (!confirmed) return;
+    // Send message to content script in the active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'markNotInterested', count: 10 });
+      }
+    });
+    // Close the popup after confirmation
+    window.close();
+  });
+}
