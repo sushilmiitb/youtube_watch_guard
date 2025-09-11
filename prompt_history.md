@@ -35,3 +35,14 @@ Let's now implement the api call to get embeddings. Following are the instructio
 * The URL of the server is: http://127.0.0.1:8000/, but make it configurable
 * Documentation is here: http://127.0.0.1:8000/docs
 * We will use this model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2, but make it configurable at project level
+
+## Implementing unfollow option for youtube
+In the youtube homepage, there is a category filter at the top for the items that are present in the homepage. We have to implement a feature with the following behavior
+1. The user selects 'select not interested option for all of the videos in the screen'
+2. We confirm the user's choice through a popup with a relevant message
+3. Once the user confirms the choice, we go on the first 10 videos, and click 'not interested' button. We don't do it all at once as it may amount to a bot activity. Instead, we wait for a random amount of time before an action before each video.
+
+Also, the code is getting complicated so let implement different functionalities in different files.
+
+## Correcting loader not getting removed
+When we are removing video element, in the watch page with tags 'ytm-shorts-lockup-view-model-v2', 'yt-lockup-view-model', a loader with the tag 'ytd-continuation-item-renderer' stays. So, let's implement a change that whenever we are deleting any of the element, check if there is a 'ytd-continuation-item-renderer' before it in the parent element, if yes, then delete it too.

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Conscious YouTube",
+  "name": "Browse Youtube Consciously",
   "version": "1.0.0",
-  "description": "A Chrome extension to enhance your YouTube experience consciously.",
+  "description": "Customize your Youtube experience by consciously deciding the topics you don't want to see.",
   "action": {
     "default_popup": "popup.html"
   },
