@@ -10,7 +10,7 @@
 
 
 <body class="p-4 bg-base-100 text-base-content min-w-72">
-  <div class="flex items-center justify-between mb-3 w-full">
+  <div class="flex items-center justify-between mb-4 w-full">
     <h1 class="text-lg font-bold">YouTube Watch Guard</h1>
     <a href="help.html" target="_blank" rel="noopener noreferrer" aria-label="Help"
        class="btn btn-xs btn-ghost text-primary flex items-center justify-center">
@@ -19,12 +19,12 @@
       </svg>
     </a>
   </div>
-  
   <!-- Compact Topic List Section -->
-  <div class="mb-4">
-    <h2 class="text-base font-semibold mb-2">Exclusion topic list</h2>
+  <div class="mb-4 border-t border-gray-500 pt-4">
+    <h2 class="text-base font-semibold mb-2">Hide unwanted videos</h2>
+    <p class="text-sm font-normal mb-2">Exclusion list</p>
     <div id="topic-compact-row" class="flex items-center gap-2 mb-2">
-      <span id="topic-compact-list" class="truncate text-sm text-gray-700 flex-1">item 1, item 2, item 3, item 4, item
+      <span id="topic-compact-list" class="truncate text-xs font-light text-gray-500 flex-1">item 1, item 2, item 3, item 4, item
         5</span>
       <button id="topic-edit-btn" class="btn btn-xs btn-ghost text-primary" aria-label="Edit topics">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -38,8 +38,8 @@
     <div id="topic-edit-section" class="mb-4" style="display: none;">
       <div class="flex items-center gap-2 mb-2">
         <input type="text" id="topic-input" placeholder="Enter topic to exclude"
-          class="input input-bordered input-sm w-full" />
-        <button id="add-topic-btn" class="btn btn-primary btn-sm">Add</button>
+          class="input input-bordered input-xs w-full placeholder:text-gray-500 placeholder:text-xs placeholder:italic placeholder:font-light" />
+        <button id="add-topic-btn" class="btn btn-primary btn-xs">Add</button>
       </div>
       <div id="error-msg" class="text-error mt-2"></div>
       <ul id="topic-list" class="mt-3 space-y-2"></ul>
@@ -48,49 +48,65 @@
 
     <!-- Video Action Configuration Section -->
     <div class="mb-4">
-      <label class="block text-sm font-medium mb-2">When a video matches an excluded topic:</label>
+      <label class="block text-sm font-normal mb-2">When a video matches an excluded topic:</label>
       <div class="flex gap-4">
-        <label class="flex items-center gap-1">
-          <input type="radio" name="video-action" id="action-hide" value="hide" class="radio radio-sm" checked />
+        <label class="flex items-center gap-1 text-xs font-light text-gray-500">
+          <input type="radio" name="video-action" id="action-hide" value="hide" class="radio radio-xs" checked />
           <span>Hide</span>
         </label>
-        <label class="flex items-center gap-1">
-          <input type="radio" name="video-action" id="action-delete" value="delete" class="radio radio-sm" />
+        <label class="flex items-center gap-1 text-xs font-light text-gray-500">
+          <input type="radio" name="video-action" id="action-delete" value="delete" class="radio radio-xs" />
           <span>Delete</span>
         </label>
       </div>
     </div>
 
     <!-- Sensitivity Control Section -->
-    <div class="border-t pt-4">
-      <label for="sensitivity-slider" class="block text-sm font-medium mb-2">
-        Sensitivity: <span id="sensitivity-value">30%</span>
+    <div class="mb-4">
+      <label for="sensitivity-slider" class="block text-sm font-normal mb-2">
+        Filter sensitivity: <span id="sensitivity-value">30%</span>
       </label>
       <input type="range" id="sensitivity-slider" min="0" max="100" value="30"
-        class="range range-primary range-sm w-full" />
+        class="range range-xs w-full range-primary opacity-100" />
       <div class="flex justify-between text-xs text-gray-500 mt-1">
-        <span>Less Strict</span>
-        <span>More Strict</span>
+        <span>Hide more</span>
+        <span>Hide less</span>
       </div>
-      <br>
     </div>
   </div>
   <!-- Shorts Section Removal Configuration -->
-  <div class="mb-4 border-t pt-4">
-    <label class="flex items-center gap-2">
-      <span>Remove Shorts section from recommendations</span>
-      <input type="checkbox" id="remove-shorts-section" class="checkbox checkbox-sm" />
+  <div class="mb-4 border-t border-gray-500 pt-4">
+    <label class="flex items-center justify-between gap-2 w-full">
+      <span class="text-sm font-medium">Hide Shorts from feed</span>
+      <input type="checkbox" id="remove-shorts-section" class="checkbox checkbox-primary checkbox-sm" />
     </label>
   </div>
 
   <!-- Not Interested Section -->
-  <div class="mb-2 border-t pt-4">
-    <div class="text-base font-medium mb-1">Mark first 10 videos as not interested</div>
+  <div class="mb-4 border-t border-gray-500 pt-4">
+    <div class="text-base font-normal mb-1">Mark first 10 videos as not interested</div>
     <div class="text-xs text-gray-500 mb-2">It will train the YouTube algorithm to not show these recommendations</div>
     <button id="not-interested-btn" class="btn btn-warning btn-xs w-full">Mark now</button>
   </div>
 
   <script type="module" src="popup.js"></script>
+  <template id="topic-list-item-template">
+    <li class="flex items-center justify-between px-2 py-1 rounded">
+      <span class="topic-label"></span>
+      <div class="flex gap-1">
+        <button class="btn btn-xs btn-ghost text-primary edit-btn" aria-label="Edit">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+          </svg>
+        </button>
+        <button class="btn btn-xs btn-ghost text-error remove-btn" aria-label="Remove">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strok-width="1.5" stroke="currentColor" class="size-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </button>
+      </div>
+    </li>
+  </template>
 </body>
 
 </html>

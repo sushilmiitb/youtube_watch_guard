@@ -126,3 +126,7 @@ This will watch for changes and automatically rebuild the bundle.
 ## License
 
 MIT License
+
+## Credits
+
+- Icons used in this extension are from [Heroicons](https://heroicons.com/) by the makers of Tailwind CSS.
