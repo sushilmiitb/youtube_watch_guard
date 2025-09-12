@@ -1,5 +1,5 @@
 {
-  "name": "conscious_youtube",
+  "name": "youtube_watch_guard",
   "version": "1.0.0",
   "description": "A Chrome extension to enhance your YouTube experience consciously.",
   "scripts": {
