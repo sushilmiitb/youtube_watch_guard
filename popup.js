@@ -188,15 +188,21 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 const notInterestedBtn = document.getElementById('not-interested-btn');
 if (notInterestedBtn) {
   notInterestedBtn.addEventListener('click', async () => {
-    const confirmed = confirm('Are you sure you want to mark the first 10 videos as Not Interested? This action cannot be undone.');
-    if (!confirmed) return;
-    // Send message to content script in the active tab
+    // Check if the active tab is the YouTube homepage first
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'markNotInterested', count: 10 });
+      const tab = tabs[0];
+      if (!tab || !tab.url) return;
+      const url = tab.url.replace(/\/$/, ''); // Remove trailing slash
+      if (url === 'https://www.youtube.com' || url === 'https://youtube.com') {
+        const confirmed = confirm('Are you sure you want to mark the first 10 videos as Not Interested? This action cannot be undone.');
+        if (!confirmed) return;
+        if (tab.id) {
+          chrome.tabs.sendMessage(tab.id, { action: 'markNotInterested', count: 10 });
+        }
+        window.close();
+      } else {
+        alert('The "Mark now" feature only works on the YouTube homepage. Please open https://www.youtube.com/ and try again.');
       }
     });
-    // Close the popup after confirmation
-    window.close();
   });
 }

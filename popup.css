@@ -1106,6 +1106,10 @@ html {
     --tw-text-opacity: 1;
   }
 
+  .\!tab:hover {
+    --tw-text-opacity: 1 !important;
+  }
+
   .tabs-boxed :is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):hover, .tabs-boxed :is(input:checked):hover {
     --tw-text-opacity: 1;
     color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity)));
@@ -2053,6 +2057,13 @@ html {
     cursor: not-allowed;
     color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)));
     --tw-text-opacity: 0.2;
+  }
+
+  .\!tab[disabled],
+    .\!tab[disabled]:hover {
+    cursor: not-allowed !important;
+    color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity))) !important;
+    --tw-text-opacity: 0.2 !important;
   }
 }
 
@@ -3061,6 +3072,12 @@ html {
   border-bottom-color: transparent;
 }
 
+.tabs-lifted:has(.tab-content[class^="rounded-"])
+    .\!tab:first-child:not(:is(.tab-active, [aria-selected="true"])), .tabs-lifted:has(.tab-content[class*=" rounded-"])
+    .\!tab:first-child:not(:is(.tab-active, [aria-selected="true"])) {
+  border-bottom-color: transparent !important;
+}
+
 .tab {
   position: relative;
   grid-row-start: 1;
@@ -3090,10 +3107,45 @@ html {
   padding-inline-end: var(--tab-padding, 1rem);
 }
 
+.\!tab {
+  position: relative !important;
+  grid-row-start: 1 !important;
+  display: inline-flex !important;
+  height: 2rem !important;
+  cursor: pointer !important;
+  -webkit-user-select: none !important;
+     -moz-user-select: none !important;
+          user-select: none !important;
+  -webkit-appearance: none !important;
+     -moz-appearance: none !important;
+          appearance: none !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  line-height: 2 !important;
+  --tab-padding: 1rem !important;
+  --tw-text-opacity: 0.5 !important;
+  --tab-color: var(--fallback-bc,oklch(var(--bc)/1)) !important;
+  --tab-bg: var(--fallback-b1,oklch(var(--b1)/1)) !important;
+  --tab-border-color: var(--fallback-b3,oklch(var(--b3)/1)) !important;
+  color: var(--tab-color) !important;
+  padding-inline-start: var(--tab-padding, 1rem) !important;
+  padding-inline-end: var(--tab-padding, 1rem) !important;
+}
+
 .tab:is(input[type="radio"]) {
   width: auto;
   border-bottom-right-radius: 0px;
   border-bottom-left-radius: 0px;
+}
+
+.\!tab:is(input[type="radio"]) {
+  width: auto !important;
+  border-bottom-right-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
 }
 
 .tab:is(input[type="radio"]):after {
@@ -3101,9 +3153,19 @@ html {
   content: var(--tw-content);
 }
 
+.\!tab:is(input[type="radio"]):after {
+  --tw-content: attr(aria-label) !important;
+  content: var(--tw-content) !important;
+}
+
 .tab:not(input):empty {
   cursor: default;
   grid-column-start: span 9999;
+}
+
+.\!tab:not(input):empty {
+  cursor: default !important;
+  grid-column-start: span 9999 !important;
 }
 
 .tab-content {
@@ -3124,6 +3186,10 @@ html {
 input.tab:checked + .tab-content,
 :is(.tab-active, [aria-selected="true"]) + .tab-content {
   display: block;
+}
+
+input.\!tab:checked + .tab-content {
+  display: block !important;
 }
 
 .\!table {
@@ -6245,10 +6311,21 @@ details.collapse summary::-webkit-details-marker {
   border-end-start-radius: 0;
 }
 
+.tabs-lifted > .\!tab:focus-visible {
+  border-end-end-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+}
+
 .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]), .tab:is(input:checked) {
   border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity)));
   --tw-border-opacity: 1;
   --tw-text-opacity: 1;
+}
+
+.\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]), .\!tab:is(input:checked) {
+  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity))) !important;
+  --tw-border-opacity: 1 !important;
+  --tw-text-opacity: 1 !important;
 }
 
 .tab:focus {
@@ -6256,9 +6333,19 @@ details.collapse summary::-webkit-details-marker {
   outline-offset: 2px;
 }
 
+.\!tab:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+}
+
 .tab:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -5px;
+}
+
+.\!tab:focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: -5px !important;
 }
 
 .tab-disabled,
@@ -6268,11 +6355,25 @@ details.collapse summary::-webkit-details-marker {
   --tw-text-opacity: 0.2;
 }
 
+
+  .\!tab[disabled] {
+  cursor: not-allowed !important;
+  color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity))) !important;
+  --tw-text-opacity: 0.2 !important;
+}
+
 .tabs-bordered > .tab {
   border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity)));
   --tw-border-opacity: 0.2;
   border-style: solid;
   border-bottom-width: calc(var(--tab-border, 1px) + 1px);
+}
+
+.tabs-bordered > .\!tab {
+  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity))) !important;
+  --tw-border-opacity: 0.2 !important;
+  border-style: solid !important;
+  border-bottom-width: calc(var(--tab-border, 1px) + 1px) !important;
 }
 
 .tabs-lifted > .tab {
@@ -6286,6 +6387,17 @@ details.collapse summary::-webkit-details-marker {
   padding-top: var(--tab-border, 1px);
 }
 
+.tabs-lifted > .\!tab {
+  border: var(--tab-border, 1px) solid transparent !important;
+  border-width: 0 0 var(--tab-border, 1px) 0 !important;
+  border-start-start-radius: var(--tab-radius, 0.5rem) !important;
+  border-start-end-radius: var(--tab-radius, 0.5rem) !important;
+  border-bottom-color: var(--tab-border-color) !important;
+  padding-inline-start: var(--tab-padding, 1rem) !important;
+  padding-inline-end: var(--tab-padding, 1rem) !important;
+  padding-top: var(--tab-border, 1px) !important;
+}
+
 .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]), .tabs-lifted > .tab:is(input:checked) {
   background-color: var(--tab-bg);
   border-width: var(--tab-border, 1px) var(--tab-border, 1px) 0 var(--tab-border, 1px);
@@ -6296,6 +6408,18 @@ details.collapse summary::-webkit-details-marker {
   padding-inline-end: calc(var(--tab-padding, 1rem) - var(--tab-border, 1px));
   padding-bottom: var(--tab-border, 1px);
   padding-top: 0;
+}
+
+.tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]), .tabs-lifted > .\!tab:is(input:checked) {
+  background-color: var(--tab-bg) !important;
+  border-width: var(--tab-border, 1px) var(--tab-border, 1px) 0 var(--tab-border, 1px) !important;
+  border-inline-start-color: var(--tab-border-color) !important;
+  border-inline-end-color: var(--tab-border-color) !important;
+  border-top-color: var(--tab-border-color) !important;
+  padding-inline-start: calc(var(--tab-padding, 1rem) - var(--tab-border, 1px)) !important;
+  padding-inline-end: calc(var(--tab-padding, 1rem) - var(--tab-border, 1px)) !important;
+  padding-bottom: var(--tab-border, 1px) !important;
+  padding-top: 0 !important;
 }
 
 .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):before, .tabs-lifted > .tab:is(input:checked):before {
@@ -6328,9 +6452,44 @@ details.collapse summary::-webkit-details-marker {
   background-image: var(--radius-start), var(--radius-end);
 }
 
+.tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):before, .tabs-lifted > .\!tab:is(input:checked):before {
+  z-index: 1 !important;
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  width: calc(100% + var(--tab-radius, 0.5rem) * 2) !important;
+  height: var(--tab-radius, 0.5rem) !important;
+  bottom: 0 !important;
+  background-size: var(--tab-radius, 0.5rem) !important;
+  background-position: top left,
+        top right !important;
+  background-repeat: no-repeat !important;
+  --tab-grad: calc(69% - var(--tab-border, 1px)) !important;
+  --radius-start: radial-gradient(
+        circle at top left,
+        transparent var(--tab-grad),
+        var(--tab-border-color) calc(var(--tab-grad) + 0.25px),
+        var(--tab-border-color) calc(var(--tab-grad) + var(--tab-border, 1px)),
+        var(--tab-bg) calc(var(--tab-grad) + var(--tab-border, 1px) + 0.25px)
+      ) !important;
+  --radius-end: radial-gradient(
+        circle at top right,
+        transparent var(--tab-grad),
+        var(--tab-border-color) calc(var(--tab-grad) + 0.25px),
+        var(--tab-border-color) calc(var(--tab-grad) + var(--tab-border, 1px)),
+        var(--tab-bg) calc(var(--tab-grad) + var(--tab-border, 1px) + 0.25px)
+      ) !important;
+  background-image: var(--radius-start), var(--radius-end) !important;
+}
+
 .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):first-child:before, .tabs-lifted > .tab:is(input:checked):first-child:before {
   background-image: var(--radius-end);
   background-position: top right;
+}
+
+.tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):first-child:before, .tabs-lifted > .\!tab:is(input:checked):first-child:before {
+  background-image: var(--radius-end) !important;
+  background-position: top right !important;
 }
 
 [dir="rtl"] .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):first-child:before, [dir="rtl"] .tabs-lifted > .tab:is(input:checked):first-child:before {
@@ -6338,14 +6497,29 @@ details.collapse summary::-webkit-details-marker {
   background-position: top left;
 }
 
+[dir="rtl"] .tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):first-child:before, [dir="rtl"] .tabs-lifted > .\!tab:is(input:checked):first-child:before {
+  background-image: var(--radius-start) !important;
+  background-position: top left !important;
+}
+
 .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):last-child:before, .tabs-lifted > .tab:is(input:checked):last-child:before {
   background-image: var(--radius-start);
   background-position: top left;
 }
 
+.tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):last-child:before, .tabs-lifted > .\!tab:is(input:checked):last-child:before {
+  background-image: var(--radius-start) !important;
+  background-position: top left !important;
+}
+
 [dir="rtl"] .tabs-lifted > .tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):last-child:before, [dir="rtl"] .tabs-lifted > .tab:is(input:checked):last-child:before {
   background-image: var(--radius-end);
   background-position: top right;
+}
+
+[dir="rtl"] .tabs-lifted > .\!tab:is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):last-child:before, [dir="rtl"] .tabs-lifted > .\!tab:is(input:checked):last-child:before {
+  background-image: var(--radius-end) !important;
+  background-position: top right !important;
 }
 
 .tabs-lifted
@@ -6354,6 +6528,11 @@ details.collapse summary::-webkit-details-marker {
   :is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]):before, .tabs-lifted > .tab:is(input:checked) + .tabs-lifted .tab:is(input:checked):before {
   background-image: var(--radius-end);
   background-position: top right;
+}
+
+ .tabs-lifted > .\!tab:is(input:checked) + .tabs-lifted .\!tab:is(input:checked):before {
+  background-image: var(--radius-end) !important;
+  background-position: top right !important;
 }
 
 .tabs-boxed {
@@ -6365,6 +6544,10 @@ details.collapse summary::-webkit-details-marker {
 
 .tabs-boxed .tab {
   border-radius: var(--rounded-btn, 0.5rem);
+}
+
+.tabs-boxed .\!tab {
+  border-radius: var(--rounded-btn, 0.5rem) !important;
 }
 
 .tabs-boxed :is(.tab-active, [aria-selected="true"]):not(.tab-disabled):not([disabled]), .tabs-boxed :is(input:checked) {
@@ -7814,12 +7997,28 @@ html:has(.drawer-open.drawer-open) {
   --tab-padding: 1rem;
 }
 
+.tabs-md :where(.\!tab) {
+  height: 2rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  line-height: 2 !important;
+  --tab-padding: 1rem !important;
+}
+
 .tabs-lg :where(.tab) {
   height: 3rem;
   font-size: 1.125rem;
   line-height: 1.75rem;
   line-height: 2;
   --tab-padding: 1.25rem;
+}
+
+.tabs-lg :where(.\!tab) {
+  height: 3rem !important;
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
+  line-height: 2 !important;
+  --tab-padding: 1.25rem !important;
 }
 
 .tabs-sm :where(.tab) {
@@ -7829,11 +8028,25 @@ html:has(.drawer-open.drawer-open) {
   --tab-padding: 0.75rem;
 }
 
+.tabs-sm :where(.\!tab) {
+  height: 1.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: .75rem !important;
+  --tab-padding: 0.75rem !important;
+}
+
 .tabs-xs :where(.tab) {
   height: 1.25rem;
   font-size: 0.75rem;
   line-height: .75rem;
   --tab-padding: 0.5rem;
+}
+
+.tabs-xs :where(.\!tab) {
+  height: 1.25rem !important;
+  font-size: 0.75rem !important;
+  line-height: .75rem !important;
+  --tab-padding: 0.5rem !important;
 }
 
 .textarea-xs {
