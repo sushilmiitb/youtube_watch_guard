@@ -8875,6 +8875,10 @@ html:has(.drawer-open.drawer-open) {
   margin-top: 1rem;
 }
 
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
 .box-border {
   box-sizing: border-box;
 }
@@ -9063,6 +9067,18 @@ html:has(.drawer-open.drawer-open) {
 
 .max-w-36 {
   max-width: 9rem;
+}
+
+.max-w-md {
+  max-width: 28rem;
+}
+
+.max-w-lg {
+  max-width: 32rem;
+}
+
+.max-w-xl {
+  max-width: 36rem;
 }
 
 .flex-1 {
@@ -10070,6 +10086,11 @@ html:has(.drawer-open.drawer-open) {
 .border-gray-500 {
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
+}
+
+.border-base-300 {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity, 1)));
 }
 
 .bg-\[rgb\(255\2c 0\2c 0\)\] {

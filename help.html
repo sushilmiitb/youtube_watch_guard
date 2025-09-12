@@ -6,16 +6,56 @@
   <title>Help - YouTube Watch Guard</title>
   <link rel="stylesheet" href="popup.css">
 </head>
-<body class="p-4 bg-base-100 text-base-content min-w-72">
-  <h1 class="text-lg font-bold mb-3">Help &amp; Documentation</h1>
-  <p class="mb-4 text-sm">This page provides help and documentation for the YouTube Watch Guard extension. Here you can find information about how to use the extension, manage exclusion topics, configure filtering, and more.</p>
-  <ul class="list-disc pl-5 mb-4 text-sm">
-    <li><b>Exclusion Topics:</b> Add topics you want to filter out from YouTube recommendations.</li>
-    <li><b>Video Actions:</b> Choose whether to hide or delete filtered videos.</li>
-    <li><b>Sensitivity:</b> Adjust how strictly topics are matched.</li>
-    <li><b>Shorts Removal:</b> Optionally remove YouTube Shorts sections.</li>
-    <li><b>Not Interested:</b> Mark videos as not interested to train YouTube's algorithm.</li>
+<body class="p-4 bg-base-100 text-base-content min-w-72" style="padding:16px;">
+  <h1 class="text-xl font-bold mb-4">YouTube Watch Guard – Help & Guide</h1>
+  <p class="mb-4 text-sm">YouTube Watch Guard helps you take control of your YouTube recommendations by filtering out videos and topics you want to avoid. The extension uses semantic filtering and customizable options to make your YouTube experience more conscious and distraction-free.</p>
+
+  <div class="border-t my-4"></div>
+
+  <h2 class="text-base font-bold mb-2">Hide unwanted videos</h2>
+  <ul class="mb-4 text-sm list-disc pl-5">
+    <li><span class="font-semibold">Exclusion list:</span> Add topics (e.g., "cricket", "bollywood") you want to filter out from YouTube recommendations. Videos related to these topics will be hidden or deleted based on your settings.</li>
+    <li><span class="font-semibold">Edit / Remove:</span> Use the pencil icon to edit a topic, or the red minus icon to remove it from your exclusion list.</li>
+    <li><span class="font-semibold">Add:</span> Enter a topic and click "Add" to include it in your exclusion list.</li>
+    <li><span class="font-semibold">Done:</span> Click to exit edit mode and return to the compact view.</li>
   </ul>
-  <a href="popup.html" class="text-primary underline hover:text-primary-focus text-xs">Back to Popup</a>
+
+  <div class="mb-4">
+    <span class="block text-xs font-semibold text-gray-600 mb-1">When a video matches an excluded topic:</span>
+    <ul class="text-sm list-disc pl-5">
+      <li><span class="font-semibold">Deactivate:</span> The video will be deactivated from your feed, but still present in the DOM (can be activated if needed).</li>
+      <li><span class="font-semibold">Delete:</span> The video will be completely removed from the page.</li>
+    </ul>
+  </div>
+
+  <div class="mb-4">
+    <span class="block text-xs font-semibold text-gray-600 mb-1">Filter sensitivity</span>
+    <ul class="text-sm list-disc pl-5">
+      <li>Adjust how strictly the extension matches videos to your excluded topics. <span class="font-semibold">Hide more</span> will filter out even loosely related videos, while <span class="font-semibold">Hide less</span> will only filter close matches. Default is 30%.</li>
+    </ul>
+  </div>
+
+  <div class="border-t my-4"></div>
+
+  <h2 class="text-base font-bold mb-2">Hide Shorts from feed</h2>
+  <p class="mb-4 text-sm">Enable this option to remove YouTube Shorts sections from your homepage and recommendations.</p>
+
+  <div class="border-t my-4"></div>
+
+  <h2 class="text-base font-bold mb-2">Mark first 10 videos as not interested</h2>
+  <ul class="mb-4 text-sm list-disc pl-5">
+    <li>On the YouTube home feed, you can mark videos as "Not Interested" to signal to YouTube's algorithm that you want to see less of that type of content. However, it's easy to fall back into unconscious viewing habits, and YouTube may start showing similar content again over time.</li>
+    <li>This tool automates the process: when you click <span class="font-semibold">Mark now</span>, it will automatically mark the top 10 videos on your YouTube homepage as "Not Interested." This helps reinforce your conscious choices and trains the algorithm to reduce unwanted recommendations.</li>
+    <li>YouTube categorizes the videos it shows in your home feed. You can decide which topics you don't want to see, and use this tool to regularly mark those videos as not interested. The tool is designed to remind you to repeat this exercise for best results.</li>
+    <li><span class="font-semibold">Note:</span> This action cannot be undone and may affect your future recommendations.</li>
+  </ul>
+  <figure class="mb-6">
+    <figcaption class="text-xs text-gray-500 text-center">Example: The extension can automatically mark the first 10 videos of the category "Action Thrillers" as "Not Interested" on your YouTube homepage.</figcaption>
+    <img src="images/mark uninterested demo.png" alt="YouTube Mark Not Interested Demo" class="rounded-lg border border-base-300 w-full max-w-xl mx-auto mb-2" />
+  </figure>
+
+  <div class="border-t my-4"></div>
+
+  <p class="text-xs text-gray-500">For more details, visit the <a href="https://github.com/sushilmiitb/youtube_watch_guard" class="text-primary underline">project repository</a>.</p>
 </body>
 </html>
