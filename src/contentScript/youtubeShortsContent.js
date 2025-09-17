@@ -4,6 +4,7 @@
  */
 
 import logger from '../logger.js';
+import { createSharedMutationObserver } from './mutationObserverUtils.js';
 
 // State management
 let removeShortsSection = false;
@@ -61,6 +62,17 @@ function setupShortsStorageListener() {
 }
 
 /**
+ * Debounced removal function to avoid excessive processing
+ */
+let removalTimeout = null;
+function debouncedRemoval() {
+  if (removalTimeout) {
+    clearTimeout(removalTimeout);
+  }
+  removalTimeout = setTimeout(removeShortsSectionsFromDOM, 250); // 250ms debounce
+}
+
+/**
  * Initialize the YouTube Shorts component
  */
 export async function initializeYouTubeShortsContent() {
@@ -75,7 +87,22 @@ export async function initializeYouTubeShortsContent() {
   // Initial removal if enabled
   removeShortsSectionsFromDOM();
 
+  // Set up mutation observer for dynamic content loading
+  const shortsSelectors = [
+    'ytd-rich-section-renderer',
+    'ytd-reel-shelf-renderer'
+  ];
+  
+  const observer = createSharedMutationObserver(shortsSelectors, debouncedRemoval, 250);
+  
+  // Start observing
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
   return {
-    removeShortsSectionsFromDOM
+    removeShortsSectionsFromDOM,
+    debouncedRemoval
   };
 }

@@ -10,6 +10,7 @@ import {
   setupVideoActionListeners, setupSensitivityListeners, setupEditModeListeners, setupAddTopicListeners,
   areElementsAvailable
 } from './hideUnwantedView.js';
+import logger from '../logger.js';
 
 /**
  * Initialize the Hide Unwanted Videos component
@@ -18,7 +19,7 @@ import {
 export async function initializeHideUnwanted() {
   // Check if elements are available before proceeding
   if (!areElementsAvailable()) {
-    console.error('Required DOM elements not available for Hide Unwanted component');
+    logger.error('Required DOM elements not available for Hide Unwanted component');
     return null;
   }
 
@@ -45,7 +46,7 @@ export async function initializeHideUnwanted() {
     const result = await chrome.storage.local.get(['videoAction']);
     videoAction = result.videoAction || 'hide';
   } catch (error) {
-    console.error('Failed to load video action:', error);
+    logger.error('Failed to load video action:', error);
   }
   
   // Set radio button state using view function
@@ -73,7 +74,7 @@ export async function initializeHideUnwanted() {
     const savedSensitivity = result.sensitivity || 0.3;
     setSensitivity(savedSensitivity);
   } catch (error) {
-    console.error('Failed to load sensitivity:', error);
+    logger.error('Failed to load sensitivity:', error);
     setSensitivity(0.3); // Default
   }
 
@@ -127,9 +128,9 @@ export async function initializeHideUnwanted() {
     const sensitivity = getSensitivity();
     try {
       await chrome.storage.local.set({ sensitivity });
-      console.log('Sensitivity updated:', sensitivity);
+      logger.info('Sensitivity updated:', sensitivity);
     } catch (error) {
-      console.error('Failed to save sensitivity:', error);
+      logger.error('Failed to save sensitivity:', error);
     }
   }
 

@@ -8,6 +8,7 @@ import { initializeYouTubeShorts } from './src/popup/youtubeShortsLogic.js';
 import { initializeMarkVideos } from './src/popup/markVideosLogic.js';
 import { renderTestModeIndicator } from './popupView.js';
 import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
+import logger from './src/logger.js';
 
 /**
  * Initialize all popup components
@@ -22,7 +23,7 @@ async function bootstrap() {
     // Dynamically show test mode indicator if needed
     renderTestModeIndicator(MOCK_EMBEDDING_API_CALL);
 
-    console.log('All popup components initialized successfully');
+    logger.info('All popup components initialized successfully');
     
     // Return component instances for potential external access
     return {

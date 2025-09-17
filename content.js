@@ -13,6 +13,7 @@ let hideUnwantedComponent = null;
 let markVideosComponent = null;
 let youtubeShortsComponent = null;
 
+
 /**
  * Initialize all content script components
  */

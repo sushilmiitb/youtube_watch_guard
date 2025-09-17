@@ -4,6 +4,7 @@
  */
 
 import logger from '../logger.js';
+import { createSharedMutationObserver } from './mutationObserverUtils.js';
 
 // Configuration
 const DEFAULT_SENSITIVITY = 0.3; // 30% default threshold
@@ -341,35 +342,15 @@ export async function initializeHideUnwantedContent() {
   setInterval(debouncedScan, SCAN_INTERVAL);
 
   // Set up mutation observer for dynamic content loading
-  const observer = new MutationObserver((mutations) => {
-    let shouldScan = false;
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        // Check if any added nodes are video elements
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const videoSelectors = [
-              'ytd-rich-item-renderer',
-              'ytd-video-renderer',
-              'ytd-compact-video-renderer',
-              'ytd-grid-video-renderer'
-            ];
-            for (const selector of videoSelectors) {
-              if ((node.matches && node.matches(selector)) || 
-                  (node.querySelector && node.querySelector(selector))) {
-                shouldScan = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-    if (shouldScan) {
-      debouncedScan();
-    }
-  });
-
+  const videoSelectors = [
+    'ytd-rich-item-renderer',
+    'ytd-video-renderer',
+    'ytd-compact-video-renderer',
+    'ytd-grid-video-renderer'
+  ];
+  
+  const observer = createSharedMutationObserver(videoSelectors, debouncedScan, 250);
+  
   // Start observing
   observer.observe(document.body, {
     childList: true,
