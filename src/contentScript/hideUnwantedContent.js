@@ -18,7 +18,7 @@ let isScanning = false;
 let scanTimeout = null;
 let embeddingApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
-let videoAction = 'hide'; // 'hide' or 'delete'
+let videoAction = 'delete'; // 'hide' or 'delete'
 let topicEmbeddings = [];
 
 // Import the embedding similarity function
@@ -46,7 +46,7 @@ async function loadSettings() {
     const result = await chrome.storage.local.get(['topics', 'sensitivity', 'videoAction']);
     excludedTopics = result.topics || [];
     sensitivity = result.sensitivity || DEFAULT_SENSITIVITY;
-    videoAction = result.videoAction || 'hide';
+    videoAction = result.videoAction || 'delete';
   } catch (error) {
     logger.error('Failed to load settings:', error);
   }

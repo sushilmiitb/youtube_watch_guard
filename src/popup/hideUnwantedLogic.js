@@ -41,10 +41,15 @@ export async function initializeHideUnwanted() {
   }
 
   // Load video action (hide/delete) from storage and set radio button
-  let videoAction = 'hide';
+  let videoAction = 'delete';
   try {
     const result = await chrome.storage.local.get(['videoAction']);
-    videoAction = result.videoAction || 'hide';
+    videoAction = result.videoAction || 'delete';
+    
+    // If no value exists in storage, save the default
+    if (result.videoAction === undefined) {
+      await chrome.storage.local.set({ videoAction: 'delete' });
+    }
   } catch (error) {
     logger.error('Failed to load video action:', error);
   }

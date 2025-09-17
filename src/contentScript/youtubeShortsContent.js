@@ -7,7 +7,7 @@ import logger from '../logger.js';
 import { createSharedMutationObserver } from './mutationObserverUtils.js';
 
 // State management
-let removeShortsSection = false;
+let removeShortsSection = true;
 
 /**
  * Load Shorts section removal setting from storage
@@ -15,7 +15,7 @@ let removeShortsSection = false;
 async function loadShortsSettings() {
   try {
     const result = await chrome.storage.local.get(['removeShortsSection']);
-    removeShortsSection = !!result.removeShortsSection;
+    removeShortsSection = result.removeShortsSection !== undefined ? !!result.removeShortsSection : true;
   } catch (error) {
     logger.error('Failed to load Shorts section removal setting:', error);
   }
@@ -25,7 +25,11 @@ async function loadShortsSettings() {
  * Remove Shorts sections from the DOM if enabled
  */
 function removeShortsSectionsFromDOM() {
-  if (!removeShortsSection) return;
+  logger.debug(`removeShortsSectionsFromDOM called, removeShortsSection: ${removeShortsSection}`);
+  if (!removeShortsSection) {
+    logger.debug('Shorts removal is disabled, skipping');
+    return;
+  }
   
   const selectors = [
     'ytd-rich-section-renderer',
@@ -34,6 +38,7 @@ function removeShortsSectionsFromDOM() {
   let removedCount = 0;
   for (const selector of selectors) {
     const elements = document.querySelectorAll(selector);
+    logger.debug(`Found ${elements.length} elements for selector: ${selector}`);
     elements.forEach(el => {
       if (el.parentNode) {
         el.parentNode.removeChild(el);
@@ -43,6 +48,8 @@ function removeShortsSectionsFromDOM() {
   }
   if (removedCount > 0) {
     logger.info(`Removed ${removedCount} Shorts section(s)`);
+  } else {
+    logger.debug('No Shorts sections found to remove');
   }
 }
 
@@ -80,12 +87,18 @@ export async function initializeYouTubeShortsContent() {
 
   // Load initial settings
   await loadShortsSettings();
+  logger.info(`Shorts removal enabled: ${removeShortsSection}`);
   
   // Set up storage change listener
   setupShortsStorageListener();
 
   // Initial removal if enabled
   removeShortsSectionsFromDOM();
+  
+  // Also try again after a short delay in case the page is still loading
+  setTimeout(() => {
+    removeShortsSectionsFromDOM();
+  }, 1000);
 
   // Set up mutation observer for dynamic content loading
   const shortsSelectors = [

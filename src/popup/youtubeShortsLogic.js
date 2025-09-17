@@ -11,10 +11,15 @@ import { setRemoveShortsSection, setupShortsRemovalListener } from './youtubeSho
  */
 export async function initializeYouTubeShorts() {
   // Load Shorts section removal setting from storage and set checkbox
-  let removeShortsSection = false;
+  let removeShortsSection = true;
   try {
     const result = await chrome.storage.local.get(['removeShortsSection']);
-    removeShortsSection = !!result.removeShortsSection;
+    removeShortsSection = result.removeShortsSection !== undefined ? !!result.removeShortsSection : true;
+    
+    // If no value exists in storage, save the default
+    if (result.removeShortsSection === undefined) {
+      await chrome.storage.local.set({ removeShortsSection: true });
+    }
   } catch (error) {
     console.error('Failed to load Shorts section removal setting:', error);
   }
