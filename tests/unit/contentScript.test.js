@@ -20,7 +20,7 @@ jest.mock('../../src/embeddingUtils.js', () => ({
 }));
 
 // Import the test utilities
-import { extractVideoTitle, shouldHideVideo, hideVideo, showVideo } from '../utils/contentScriptTestUtils.js';
+import { extractVideoTitle, extractChannelName, extractVideoContext, shouldHideVideo, hideVideo, showVideo } from '../utils/contentScriptTestUtils.js';
 
 describe('Content Script', () => {
   beforeEach(() => {
@@ -57,29 +57,136 @@ describe('Content Script', () => {
     });
   });
 
+  describe('extractChannelName', () => {
+    test('should extract channel name from ytd-channel-name element', () => {
+      const videoElement = document.createElement('div');
+      const channelElement = document.createElement('ytd-channel-name');
+      const linkElement = document.createElement('a');
+      linkElement.textContent = 'Test Channel';
+      channelElement.appendChild(linkElement);
+      videoElement.appendChild(channelElement);
+
+      const result = extractChannelName(videoElement);
+      expect(result).toBe('Test Channel');
+    });
+
+    test('should extract channel name from channel link', () => {
+      const videoElement = document.createElement('div');
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', '/channel/UC123456789');
+      linkElement.textContent = 'Test Channel';
+      videoElement.appendChild(linkElement);
+
+      const result = extractChannelName(videoElement);
+      expect(result).toBe('Test Channel');
+    });
+
+    test('should return null when no channel name found', () => {
+      const videoElement = document.createElement('div');
+      const result = extractChannelName(videoElement);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('extractVideoContext', () => {
+    test('should combine title and channel name when both are available', () => {
+      const videoElement = document.createElement('div');
+      
+      // Add title
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Test Video';
+      videoElement.appendChild(titleElement);
+      
+      // Add channel
+      const channelElement = document.createElement('ytd-channel-name');
+      const linkElement = document.createElement('a');
+      linkElement.textContent = 'Test Channel';
+      channelElement.appendChild(linkElement);
+      videoElement.appendChild(channelElement);
+
+      const result = extractVideoContext(videoElement);
+      expect(result).toBe('Test Video - Test Channel');
+    });
+
+    test('should return only title when channel name is not available', () => {
+      const videoElement = document.createElement('div');
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Test Video';
+      videoElement.appendChild(titleElement);
+
+      const result = extractVideoContext(videoElement);
+      expect(result).toBe('Test Video');
+    });
+
+    test('should return only channel name when title is not available', () => {
+      const videoElement = document.createElement('div');
+      const channelElement = document.createElement('ytd-channel-name');
+      const linkElement = document.createElement('a');
+      linkElement.textContent = 'Test Channel';
+      channelElement.appendChild(linkElement);
+      videoElement.appendChild(channelElement);
+
+      const result = extractVideoContext(videoElement);
+      expect(result).toBe('Test Channel');
+    });
+
+    test('should return null when neither title nor channel name is available', () => {
+      const videoElement = document.createElement('div');
+      const result = extractVideoContext(videoElement);
+      expect(result).toBeNull();
+    });
+  });
+
   describe('shouldHideVideo', () => {
-    test('should return false when no video title', async () => {
-      const result = await shouldHideVideo('');
+    test('should return false when no video context', async () => {
+      const videoElement = document.createElement('div');
+      const result = await shouldHideVideo(videoElement);
       expect(result).toBe(false);
     });
 
-    test('should always return true in test mode', async () => {
-      const result = await shouldHideVideo('Test Video', []);
+    test('should always return true in test mode when context is available', async () => {
+      const videoElement = document.createElement('div');
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Test Video';
+      videoElement.appendChild(titleElement);
+
+      const result = await shouldHideVideo(videoElement, []);
       expect(result).toBe(true);
     });
 
     test('should always return true in test mode regardless of topics', async () => {
-      const result = await shouldHideVideo('Cricket Highlights', ['cricket'], 0.3);
+      const videoElement = document.createElement('div');
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Cricket Highlights';
+      videoElement.appendChild(titleElement);
+
+      const result = await shouldHideVideo(videoElement, ['cricket'], 0.3);
       expect(result).toBe(true);
     });
 
     test('should always return true in test mode regardless of threshold', async () => {
-      const result = await shouldHideVideo('Cooking Recipe', ['cricket'], 0.3);
+      const videoElement = document.createElement('div');
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Cooking Recipe';
+      videoElement.appendChild(titleElement);
+
+      const result = await shouldHideVideo(videoElement, ['cricket'], 0.3);
       expect(result).toBe(true);
     });
 
     test('should always return true in test mode for multiple topics', async () => {
-      const result = await shouldHideVideo('Bollywood Movie', ['cricket', 'bollywood'], 0.3);
+      const videoElement = document.createElement('div');
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'yt-lockup-metadata-view-model-wiz__heading-reset';
+      titleElement.textContent = 'Bollywood Movie';
+      videoElement.appendChild(titleElement);
+
+      const result = await shouldHideVideo(videoElement, ['cricket', 'bollywood'], 0.3);
       expect(result).toBe(true);
     });
   });
@@ -90,7 +197,7 @@ describe('Content Script', () => {
       hideVideo(videoElement);
 
       expect(videoElement.classList.contains('conscious-youtube-hidden')).toBe(true);
-      expect(videoElement.style.opacity).toBe('0.25');
+      expect(videoElement.style.opacity).toBe('0.4');
       expect(videoElement.style.pointerEvents).toBe('none');
     });
 

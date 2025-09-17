@@ -87,14 +87,81 @@ function extractVideoTitle(videoElement) {
 }
 
 /**
+ * Extract channel name from a YouTube video tile
+ * @param {Element} videoElement - The video tile element
+ * @returns {string|null} - Channel name or null if not found
+ */
+function extractChannelName(videoElement) {
+  try {
+    // Look for channel name in various possible selectors
+    const channelSelectors = [
+      'ytd-channel-name a',
+      '.ytd-channel-name a',
+      'a[href*="/channel/"]',
+      'a[href*="/@"]',
+      '.ytd-video-meta-block a',
+      '.ytd-video-meta-block yt-formatted-string',
+      '.ytd-channel-name yt-formatted-string',
+      '.ytd-video-meta-block .ytd-channel-name',
+      'ytd-video-meta-block ytd-channel-name a',
+      'ytd-video-meta-block ytd-channel-name yt-formatted-string'
+    ];
+
+    for (const selector of channelSelectors) {
+      const channelElement = videoElement.querySelector(selector);
+      if (channelElement) {
+        const channelName = channelElement.textContent || 
+                           channelElement.getAttribute('title') ||
+                           channelElement.getAttribute('aria-label');
+        if (channelName && channelName.trim()) {
+          return channelName.trim();
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    logger.error('Error extracting channel name:', error);
+    return null;
+  }
+}
+
+/**
+ * Extract combined video context (title + channel name) for better embedding accuracy
+ * @param {Element} videoElement - The video tile element
+ * @returns {string|null} - Combined video context or null if neither found
+ */
+function extractVideoContext(videoElement) {
+  try {
+    const title = extractVideoTitle(videoElement);
+    const channelName = extractChannelName(videoElement);
+    
+    if (!title && !channelName) {
+      return null;
+    }
+    
+    if (title && channelName) {
+      return `${title} - ${channelName}`;
+    } else if (title) {
+      return title;
+    } else {
+      return channelName;
+    }
+  } catch (error) {
+    logger.error('Error extracting video context:', error);
+    return null;
+  }
+}
+
+/**
  * Determines if a video should be hidden based on its semantic similarity to excluded topics.
- * @param {string} videoTitle - The title of the YouTube video to evaluate.
+ * @param {Element} videoElement - The video element to evaluate.
  * @param {string[]} [topics] - An array of excluded topics to check against.
  * @param {number} [threshold] - The sensitivity threshold (0-1) for hiding.
  * @returns {Promise<boolean>} - True if the video should be hidden.
  */
-async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = sensitivity) {
-  if (!videoTitle) {
+async function shouldHideVideo(videoElement, topics = excludedTopics, threshold = sensitivity) {
+  const videoContext = extractVideoContext(videoElement);
+  if (!videoContext) {
     return false;
   }
   if (!calculateTopicSimilarity) {
@@ -102,8 +169,8 @@ async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = 
   }
   for (const topic of topics) {
     try {
-      const similarity = await calculateTopicSimilarity(topic, videoTitle);
-      logger.debug(`[ConsciousYouTube] Title: "${videoTitle}" | Topic: "${topic}" | Similarity: ${similarity}`);
+      const similarity = await calculateTopicSimilarity(topic, videoContext);
+      logger.debug(`[ConsciousYouTube] Context: "${videoContext}" | Topic: "${topic}" | Similarity: ${similarity}`);
       if (similarity >= threshold) {
         return true;
       }
@@ -119,8 +186,8 @@ async function shouldHideVideo(videoTitle, topics = excludedTopics, threshold = 
  * @param {Element} videoElement - The video element to hide
  */
 function hideVideo(videoElement) {
-  const title = extractVideoTitle(videoElement);
-  logger.debug('hideVideo called for element:', videoElement, '| Title:', title);
+  const context = extractVideoContext(videoElement);
+  logger.debug('hideVideo called for element:', videoElement, '| Context:', context);
   if (videoElement && !videoElement.classList.contains('conscious-youtube-hidden')) {
     videoElement.classList.add('conscious-youtube-hidden');
     videoElement.style.opacity = '0.4';
@@ -232,24 +299,24 @@ async function scanForVideos() {
       videoElements.push(...Array.from(elements));
     }
 
-    // Collect unprocessed video elements and their titles
+    // Collect unprocessed video elements and their contexts
     let unprocessed = [];
     for (const videoElement of videoElements) {
       if (processedVideos.has(videoElement)) continue;
-      const title = extractVideoTitle(videoElement);
-      if (title) {
-        unprocessed.push({ videoElement, title });
+      const context = extractVideoContext(videoElement);
+      if (context) {
+        unprocessed.push({ videoElement, context });
       }
     }
 
     if (unprocessed.length > 0 && excludedTopics.length > 0 && topicEmbeddings.length === excludedTopics.length) {
       if (!embeddingApi) await ensureEmbeddingApi();
       const { getBatchEmbeddings, cosineSimilarity } = embeddingApi;
-      const titles = unprocessed.map(item => item.title);
+      const contexts = unprocessed.map(item => item.context);
       let videoEmbeddings = [];
       try {
-        // Batch fetch embeddings for all video titles
-        videoEmbeddings = await getBatchEmbeddings(titles);
+        // Batch fetch embeddings for all video contexts
+        videoEmbeddings = await getBatchEmbeddings(contexts);
       } catch (error) {
         logger.error('Batch embedding API failed:', error);
         // Mark as processed to avoid retry loop
@@ -261,7 +328,7 @@ async function scanForVideos() {
       }
       // For each video, check similarity with each topic embedding
       for (let i = 0; i < unprocessed.length; i++) {
-        const { videoElement, title } = unprocessed[i];
+        const { videoElement, context } = unprocessed[i];
         const videoEmbedding = videoEmbeddings[i];
         let shouldHide = false;
         for (let t = 0; t < excludedTopics.length; t++) {
@@ -269,7 +336,7 @@ async function scanForVideos() {
           const topicEmbedding = topicEmbeddings[t];
           try {
             const similarity = cosineSimilarity(topicEmbedding, videoEmbedding);
-            logger.debug(`[ConsciousYouTube] Title: "${title}" | Topic: "${topic}" | Similarity: ${similarity}`);
+            logger.debug(`[ConsciousYouTube] Context: "${context}" | Topic: "${topic}" | Similarity: ${similarity}`);
             if (similarity >= sensitivity) {
               shouldHide = true;
               break;
@@ -361,9 +428,23 @@ export async function initializeHideUnwantedContent() {
     scanForVideos,
     clearProcessedVideosCache,
     extractVideoTitle,
+    extractChannelName,
+    extractVideoContext,
     shouldHideVideo,
     hideVideo,
     showVideo,
     deleteVideo
   };
 }
+
+// Export individual functions for testing
+export {
+  extractVideoTitle,
+  extractChannelName,
+  extractVideoContext,
+  shouldHideVideo,
+  hideVideo,
+  showVideo,
+  deleteVideo,
+  clearProcessedVideosCache
+};
