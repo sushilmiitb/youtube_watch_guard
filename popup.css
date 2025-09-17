@@ -9283,10 +9283,6 @@ html:has(.drawer-open.drawer-open) {
   transform: none;
 }
 
-.cursor-not-allowed {
-  cursor: not-allowed;
-}
-
 .touch-auto {
   touch-action: auto;
 }

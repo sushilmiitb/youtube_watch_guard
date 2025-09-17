@@ -190,6 +190,17 @@ const notInterestedBtn = document.getElementById('not-interested-btn');
 let isOnYouTubeHomepage = false;
 let isFilterSetToAll = false;
 
+// DaisyUI tooltip functions
+function setTooltipText(text) {
+  if (!notInterestedBtn) return;
+  notInterestedBtn.setAttribute('data-tip', text);
+}
+
+function clearTooltip() {
+  if (!notInterestedBtn) return;
+  notInterestedBtn.setAttribute('data-tip', '');
+}
+
 // Check if current tab is YouTube homepage and filter state, then set button state accordingly
 async function checkYouTubeHomepageAndSetButtonState() {
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -229,7 +240,7 @@ function setButtonEnabled() {
   isFilterSetToAll = false;
   notInterestedBtn.disabled = false;
   notInterestedBtn.classList.remove('btn-disabled');
-  notInterestedBtn.removeAttribute('title');
+  clearTooltip();
   // Force cursor style with !important and ensure it's applied
   notInterestedBtn.style.setProperty('cursor', 'pointer', 'important');
   notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled
@@ -239,7 +250,7 @@ function setButtonEnabled() {
 function setButtonDisabled(tooltipText) {
   notInterestedBtn.disabled = true;
   notInterestedBtn.classList.add('btn-disabled');
-  notInterestedBtn.setAttribute('title', tooltipText);
+  setTooltipText(tooltipText);
   // Force cursor style with !important and ensure it's applied
   notInterestedBtn.style.setProperty('cursor', 'not-allowed', 'important');
   notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled for tooltip
