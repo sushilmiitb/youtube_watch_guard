@@ -1,5 +1,11 @@
 import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
-import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode } from './popupView.js';
+import { 
+  getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, 
+  renderTopics, renderTopicsCompact, setTopicEditMode, initializeButtonState, setButtonEnabled, 
+  setButtonDisabled, setButtonStateFlags, getButtonState, setVideoAction, setRemoveShortsSection,
+  setupVideoActionListeners, setupShortsRemovalListener, setupSensitivityListeners, 
+  renderTestModeIndicator, setupEditModeListeners 
+} from './popupView.js';
 import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
 
 async function bootstrap() {
@@ -20,16 +26,8 @@ async function bootstrap() {
     editMode = true;
   }
 
-  // Wire up edit button
-  const editBtn = document.getElementById('topic-edit-btn');
-  if (editBtn) {
-    editBtn.addEventListener('click', showEditMode);
-  }
-  // Wire up done button in edit section
-  const doneBtn = document.getElementById('topic-edit-done-btn');
-  if (doneBtn) {
-    doneBtn.addEventListener('click', showCompactMode);
-  }
+  // Set up edit mode listeners using view function
+  setupEditModeListeners(showEditMode, showCompactMode);
 
   // Initial render: compact mode
   showCompactMode();
@@ -42,23 +40,23 @@ async function bootstrap() {
   } catch (error) {
     console.error('Failed to load video action:', error);
   }
-  // Set radio button state
-  const hideRadio = document.getElementById('action-hide');
-  const deleteRadio = document.getElementById('action-delete');
-  if (hideRadio && deleteRadio) {
-    hideRadio.checked = videoAction === 'hide';
-    deleteRadio.checked = videoAction === 'delete';
-    hideRadio.addEventListener('change', async () => {
-      if (hideRadio.checked) {
+  
+  // Set radio button state using view function
+  setVideoAction(videoAction);
+  
+  // Set up event listeners using view functions
+  setupVideoActionListeners(
+    async () => {
+      if (document.getElementById('action-hide')?.checked) {
         await chrome.storage.local.set({ videoAction: 'hide' });
       }
-    });
-    deleteRadio.addEventListener('change', async () => {
-      if (deleteRadio.checked) {
+    },
+    async () => {
+      if (document.getElementById('action-delete')?.checked) {
         await chrome.storage.local.set({ videoAction: 'delete' });
       }
-    });
-  }
+    }
+  );
 
   // Load sensitivity from storage
   try {
@@ -78,29 +76,20 @@ async function bootstrap() {
   } catch (error) {
     console.error('Failed to load Shorts section removal setting:', error);
   }
-  const shortsCheckbox = document.getElementById('remove-shorts-section');
-  if (shortsCheckbox) {
-    shortsCheckbox.checked = removeShortsSection;
-    shortsCheckbox.addEventListener('change', async () => {
+  
+  // Set checkbox state using view function
+  setRemoveShortsSection(removeShortsSection);
+  
+  // Set up event listener using view function
+  setupShortsRemovalListener(async () => {
+    const shortsCheckbox = document.getElementById('remove-shorts-section');
+    if (shortsCheckbox) {
       await chrome.storage.local.set({ removeShortsSection: shortsCheckbox.checked });
-    });
-  }
+    }
+  });
 
   // Dynamically show test mode indicator if needed
-  if (MOCK_EMBEDDING_API_CALL) {
-    const warning = document.createElement('div');
-    warning.className = 'mb-4 p-3 bg-warning rounded-lg';
-    warning.innerHTML = `
-      <div class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-        </svg>
-        <span class="text-sm font-medium">TEST MODE</span>
-      </div>
-      <p class="text-xs mt-1">All videos will be hidden for DOM manipulation testing. Check console for video titles.</p>
-    `;
-    document.body.insertBefore(warning, document.body.children[1]);
-  }
+  renderTestModeIndicator(MOCK_EMBEDDING_API_CALL);
 
   const handlers = {
     onStartEdit: (index) => {
@@ -169,15 +158,13 @@ async function bootstrap() {
     });
   }
 
-  // Sensitivity slider event listener
-  if (els.sensitivitySlider) {
-    els.sensitivitySlider.addEventListener('input', (e) => {
-      const percentage = e.target.value;
-      els.sensitivityValue.textContent = `${percentage}%`;
-    });
-
-    els.sensitivitySlider.addEventListener('change', handleSensitivityChange);
-  }
+  // Set up sensitivity slider listeners using view function
+  setupSensitivityListeners(
+    (percentage) => {
+      // Input handler - already handled in view function
+    },
+    handleSensitivityChange
+  );
 
   renderTopics(topics, { ...handlers, editingIndex });
 }
@@ -186,20 +173,7 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 
 
 // --- Not Interested Button Integration ---
-const notInterestedBtn = document.getElementById('not-interested-btn');
-let isOnYouTubeHomepage = false;
-let isFilterSetToAll = false;
-
-// DaisyUI tooltip functions
-function setTooltipText(text) {
-  if (!notInterestedBtn) return;
-  notInterestedBtn.setAttribute('data-tip', text);
-}
-
-function clearTooltip() {
-  if (!notInterestedBtn) return;
-  notInterestedBtn.setAttribute('data-tip', '');
-}
+let notInterestedBtn = null;
 
 // Check if current tab is YouTube homepage and filter state, then set button state accordingly
 async function checkYouTubeHomepageAndSetButtonState() {
@@ -214,6 +188,7 @@ async function checkYouTubeHomepageAndSetButtonState() {
     const isYouTubeHomepage = url === 'https://www.youtube.com' || url === 'https://youtube.com';
     
     if (!isYouTubeHomepage) {
+      setButtonStateFlags(false, false);
       setButtonDisabled('The "Mark now" feature only works on the YouTube homepage. Please open https://www.youtube.com/ and try again.');
       return;
     }
@@ -222,49 +197,30 @@ async function checkYouTubeHomepageAndSetButtonState() {
     try {
       const response = await chrome.tabs.sendMessage(tab.id, { action: 'getFilterState' });
       if (response && response.isAll) {
-        isFilterSetToAll = true;
+        setButtonStateFlags(true, true);
         setButtonDisabled('The "Mark now" feature only works when a specific category filter is selected. Please select a category other than "All" and try again.');
       } else {
-        isFilterSetToAll = false;
+        setButtonStateFlags(true, false);
         setButtonEnabled();
       }
     } catch (error) {
       console.error('Error checking filter state:', error);
+      setButtonStateFlags(false, false);
       setButtonDisabled('Unable to determine filter state. Please ensure you are on the YouTube homepage.');
     }
   });
 }
-// Enable button and remove tooltip
-function setButtonEnabled() {
-  isOnYouTubeHomepage = true;
-  isFilterSetToAll = false;
-  notInterestedBtn.disabled = false;
-  notInterestedBtn.classList.remove('btn-disabled');
-  notInterestedBtn.classList.remove('tooltip'); // Remove tooltip class when enabled
-  clearTooltip();
-  // Force cursor style with !important and ensure it's applied
-  notInterestedBtn.style.setProperty('cursor', 'pointer', 'important');
-  notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled
-}
 
-// Disable button and add tooltip
-function setButtonDisabled(tooltipText) {
-  notInterestedBtn.disabled = true;
-  notInterestedBtn.classList.add('btn-disabled');
-  notInterestedBtn.classList.add('tooltip'); // Add tooltip class when disabled
-  setTooltipText(tooltipText);
-  // Force cursor style with !important and ensure it's applied
-  notInterestedBtn.style.setProperty('cursor', 'not-allowed', 'important');
-  notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled for tooltip
-}
-
+// Initialize button and set up event listeners
+notInterestedBtn = initializeButtonState();
 if (notInterestedBtn) {
   // Check URL and set initial button state
   checkYouTubeHomepageAndSetButtonState();
   
   // Add click event listener
   notInterestedBtn.addEventListener('click', async () => {
-    if (!isOnYouTubeHomepage || isFilterSetToAll) {
+    const buttonState = getButtonState();
+    if (!buttonState.isOnYouTubeHomepage || buttonState.isFilterSetToAll) {
       return; // Button is disabled, do nothing
     }
     

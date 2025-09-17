@@ -145,3 +145,198 @@ export function setTopicEditMode(editMode) {
   }
 }
 
+// --- Button State Management ---
+let notInterestedBtn = null;
+let isOnYouTubeHomepage = false;
+let isFilterSetToAll = false;
+
+/**
+ * Initialize button state management
+ */
+export function initializeButtonState() {
+  notInterestedBtn = document.getElementById('not-interested-btn');
+  return notInterestedBtn;
+}
+
+/**
+ * Set tooltip text for the button
+ * @param {string} text - Tooltip text
+ */
+export function setTooltipText(text) {
+  if (!notInterestedBtn) return;
+  notInterestedBtn.setAttribute('data-tip', text);
+}
+
+/**
+ * Clear tooltip text
+ */
+export function clearTooltip() {
+  if (!notInterestedBtn) return;
+  notInterestedBtn.setAttribute('data-tip', '');
+}
+
+/**
+ * Enable the button and remove tooltip
+ */
+export function setButtonEnabled() {
+  if (!notInterestedBtn) return;
+  isOnYouTubeHomepage = true;
+  isFilterSetToAll = false;
+  notInterestedBtn.disabled = false;
+  notInterestedBtn.classList.remove('btn-disabled');
+  notInterestedBtn.classList.remove('tooltip');
+  clearTooltip();
+  notInterestedBtn.style.setProperty('cursor', 'pointer', 'important');
+  notInterestedBtn.style.pointerEvents = 'auto';
+}
+
+/**
+ * Disable the button and add tooltip
+ * @param {string} tooltipText - Text to show in tooltip
+ */
+export function setButtonDisabled(tooltipText) {
+  if (!notInterestedBtn) return;
+  notInterestedBtn.disabled = true;
+  notInterestedBtn.classList.add('btn-disabled');
+  notInterestedBtn.classList.add('tooltip');
+  setTooltipText(tooltipText);
+  notInterestedBtn.style.setProperty('cursor', 'not-allowed', 'important');
+  notInterestedBtn.style.pointerEvents = 'auto';
+}
+
+/**
+ * Get current button state
+ */
+export function getButtonState() {
+  return {
+    isOnYouTubeHomepage,
+    isFilterSetToAll,
+    isDisabled: notInterestedBtn ? notInterestedBtn.disabled : true
+  };
+}
+
+/**
+ * Set button state flags
+ * @param {boolean} onHomepage - Whether on YouTube homepage
+ * @param {boolean} filterAll - Whether filter is set to "All"
+ */
+export function setButtonStateFlags(onHomepage, filterAll) {
+  isOnYouTubeHomepage = onHomepage;
+  isFilterSetToAll = filterAll;
+}
+
+// --- Storage UI Management ---
+
+/**
+ * Set video action radio buttons
+ * @param {string} action - 'hide' or 'delete'
+ */
+export function setVideoAction(action) {
+  const hideRadio = document.getElementById('action-hide');
+  const deleteRadio = document.getElementById('action-delete');
+  if (hideRadio && deleteRadio) {
+    hideRadio.checked = action === 'hide';
+    deleteRadio.checked = action === 'delete';
+  }
+}
+
+/**
+ * Set Shorts section removal checkbox
+ * @param {boolean} enabled - Whether to remove Shorts sections
+ */
+export function setRemoveShortsSection(enabled) {
+  const shortsCheckbox = document.getElementById('remove-shorts-section');
+  if (shortsCheckbox) {
+    shortsCheckbox.checked = enabled;
+  }
+}
+
+/**
+ * Set up video action change listeners
+ * @param {Function} onHideChange - Callback for hide radio change
+ * @param {Function} onDeleteChange - Callback for delete radio change
+ */
+export function setupVideoActionListeners(onHideChange, onDeleteChange) {
+  const hideRadio = document.getElementById('action-hide');
+  const deleteRadio = document.getElementById('action-delete');
+  
+  if (hideRadio) {
+    hideRadio.addEventListener('change', onHideChange);
+  }
+  if (deleteRadio) {
+    deleteRadio.addEventListener('change', onDeleteChange);
+  }
+}
+
+/**
+ * Set up Shorts section removal listener
+ * @param {Function} onChange - Callback for checkbox change
+ */
+export function setupShortsRemovalListener(onChange) {
+  const shortsCheckbox = document.getElementById('remove-shorts-section');
+  if (shortsCheckbox) {
+    shortsCheckbox.addEventListener('change', onChange);
+  }
+}
+
+/**
+ * Set up sensitivity slider listeners
+ * @param {Function} onInput - Callback for slider input
+ * @param {Function} onChange - Callback for slider change
+ */
+export function setupSensitivityListeners(onInput, onChange) {
+  const { sensitivitySlider, sensitivityValue } = getElements();
+  
+  if (sensitivitySlider) {
+    sensitivitySlider.addEventListener('input', (e) => {
+      const percentage = e.target.value;
+      if (sensitivityValue) {
+        sensitivityValue.textContent = `${percentage}%`;
+      }
+      onInput(percentage);
+    });
+    
+    sensitivitySlider.addEventListener('change', onChange);
+  }
+}
+
+/**
+ * Render test mode indicator
+ * @param {boolean} show - Whether to show the indicator
+ */
+export function renderTestModeIndicator(show) {
+  if (!show) return;
+  
+  const warning = document.createElement('div');
+  warning.className = 'mb-4 p-3 bg-warning rounded-lg';
+  warning.innerHTML = `
+    <div class="flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+      </svg>
+      <span class="text-sm font-medium">TEST MODE</span>
+    </div>
+    <p class="text-xs mt-1">All videos will be hidden for DOM manipulation testing. Check console for video titles.</p>
+  `;
+  document.body.insertBefore(warning, document.body.children[1]);
+}
+
+// --- Edit Mode Management ---
+
+/**
+ * Set up edit mode event listeners
+ * @param {Function} onEditClick - Callback for edit button click
+ * @param {Function} onDoneClick - Callback for done button click
+ */
+export function setupEditModeListeners(onEditClick, onDoneClick) {
+  const editBtn = document.getElementById('topic-edit-btn');
+  const doneBtn = document.getElementById('topic-edit-done-btn');
+  
+  if (editBtn) {
+    editBtn.addEventListener('click', onEditClick);
+  }
+  if (doneBtn) {
+    doneBtn.addEventListener('click', onDoneClick);
+  }
+}
+
