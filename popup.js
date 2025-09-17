@@ -240,6 +240,7 @@ function setButtonEnabled() {
   isFilterSetToAll = false;
   notInterestedBtn.disabled = false;
   notInterestedBtn.classList.remove('btn-disabled');
+  notInterestedBtn.classList.remove('tooltip'); // Remove tooltip class when enabled
   clearTooltip();
   // Force cursor style with !important and ensure it's applied
   notInterestedBtn.style.setProperty('cursor', 'pointer', 'important');
@@ -250,6 +251,7 @@ function setButtonEnabled() {
 function setButtonDisabled(tooltipText) {
   notInterestedBtn.disabled = true;
   notInterestedBtn.classList.add('btn-disabled');
+  notInterestedBtn.classList.add('tooltip'); // Add tooltip class when disabled
   setTooltipText(tooltipText);
   // Force cursor style with !important and ensure it's applied
   notInterestedBtn.style.setProperty('cursor', 'not-allowed', 'important');
