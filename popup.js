@@ -1,5 +1,5 @@
 import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
-import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode } from './popupView.js';
+import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode, isYouTubeFilterSetToAll } from './popupView.js';
 import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
 
 async function bootstrap() {
@@ -184,24 +184,98 @@ async function bootstrap() {
 
 document.addEventListener('DOMContentLoaded', bootstrap);
 
+/**
+ * Check if the currently selected category filter in YouTube homepage is "All"
+ * This is a wrapper function that uses the implementation from popupView.js
+ * @returns {Promise<boolean>} True if "All" filter is selected, false otherwise
+ */
+export async function checkIfYouTubeFilterIsAll() {
+  try {
+    return await isYouTubeFilterSetToAll();
+  } catch (error) {
+    console.error('Error checking YouTube filter state:', error);
+    return false;
+  }
+}
+
 // --- Not Interested Button Integration ---
 const notInterestedBtn = document.getElementById('not-interested-btn');
+let isOnYouTubeHomepage = false;
+let isFilterSetToAll = false;
+
+// Check if current tab is YouTube homepage and filter state, then set button state accordingly
+async function checkYouTubeHomepageAndSetButtonState() {
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const tab = tabs[0];
+    if (!tab || !tab.url) {
+      setButtonDisabled('Unable to determine current page');
+      return;
+    }
+    
+    const url = tab.url.replace(/\/$/, ''); // Remove trailing slash
+    const isYouTubeHomepage = url === 'https://www.youtube.com' || url === 'https://youtube.com';
+    
+    if (!isYouTubeHomepage) {
+      setButtonDisabled('The "Mark now" feature only works on the YouTube homepage. Please open https://www.youtube.com/ and try again.');
+      return;
+    }
+    
+    // If we're on YouTube homepage, check the filter state
+    try {
+      const isFilterAll = await isYouTubeFilterSetToAll();
+      isFilterSetToAll = isFilterAll;
+      
+      if (isFilterAll) {
+        setButtonDisabled('The "Mark now" feature only works when a specific category filter is selected. Please select a category other than "All" and try again.');
+      } else {
+        setButtonEnabled();
+      }
+    } catch (error) {
+      console.error('Error checking filter state:', error);
+      setButtonDisabled('Unable to determine filter state. Please ensure you are on the YouTube homepage.');
+    }
+  });
+}
+// Enable button and remove tooltip
+function setButtonEnabled() {
+  isOnYouTubeHomepage = true;
+  isFilterSetToAll = false;
+  notInterestedBtn.disabled = false;
+  notInterestedBtn.classList.remove('btn-disabled');
+  notInterestedBtn.removeAttribute('title');
+  // Force cursor style with !important and ensure it's applied
+  notInterestedBtn.style.setProperty('cursor', 'pointer', 'important');
+  notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled
+}
+
+// Disable button and add tooltip
+function setButtonDisabled(tooltipText) {
+  notInterestedBtn.disabled = true;
+  notInterestedBtn.classList.add('btn-disabled');
+  notInterestedBtn.setAttribute('title', tooltipText);
+  // Force cursor style with !important and ensure it's applied
+  notInterestedBtn.style.setProperty('cursor', 'not-allowed', 'important');
+  notInterestedBtn.style.pointerEvents = 'auto'; // Ensure pointer events are enabled for tooltip
+}
+
 if (notInterestedBtn) {
+  // Check URL and set initial button state
+  checkYouTubeHomepageAndSetButtonState();
+  
+  // Add click event listener
   notInterestedBtn.addEventListener('click', async () => {
-    // Check if the active tab is the YouTube homepage first
+    if (!isOnYouTubeHomepage || isFilterSetToAll) {
+      return; // Button is disabled, do nothing
+    }
+    
+    const confirmed = confirm('Are you sure you want to mark the first 10 videos as Not Interested? This action cannot be undone.');
+    if (!confirmed) return;
+    
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
-      if (!tab || !tab.url) return;
-      const url = tab.url.replace(/\/$/, ''); // Remove trailing slash
-      if (url === 'https://www.youtube.com' || url === 'https://youtube.com') {
-        const confirmed = confirm('Are you sure you want to mark the first 10 videos as Not Interested? This action cannot be undone.');
-        if (!confirmed) return;
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, { action: 'markNotInterested', count: 10 });
-        }
+      if (tab && tab.id) {
+        chrome.tabs.sendMessage(tab.id, { action: 'markNotInterested', count: 10 });
         window.close();
-      } else {
-        alert('The "Mark now" feature only works on the YouTube homepage. Please open https://www.youtube.com/ and try again.');
       }
     });
   });
