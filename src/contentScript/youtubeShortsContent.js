@@ -42,7 +42,7 @@ function removeShortsSectionsFromDOM() {
     });
   }
   if (removedCount > 0) {
-    logger.info(`Conscious YouTube: Removed ${removedCount} Shorts section(s)`);
+    logger.info(`Removed ${removedCount} Shorts section(s)`);
   }
 }
 
@@ -53,7 +53,7 @@ function setupShortsStorageListener() {
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.removeShortsSection) {
       loadShortsSettings().then(() => {
-        logger.info('Conscious YouTube: Shorts section removal setting changed');
+        logger.info('Shorts section removal setting changed');
         // Re-scan to apply new setting
         removeShortsSectionsFromDOM();
       });
@@ -76,7 +76,7 @@ function debouncedRemoval() {
  * Initialize the YouTube Shorts component
  */
 export async function initializeYouTubeShortsContent() {
-  logger.info('Conscious YouTube: YouTube Shorts component initializing');
+  logger.info('YouTube Shorts component initializing');
 
   // Load initial settings
   await loadShortsSettings();

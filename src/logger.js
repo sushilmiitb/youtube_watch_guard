@@ -7,6 +7,8 @@ function shouldLog(level) {
   return LEVELS.indexOf(level) >= LEVELS.indexOf(currentLevel);
 }
 
+const APP_NAME = 'YouTube Watch Guard';
+
 const logger = {
   setLevel(level) {
     if (LEVELS.includes(level)) {
@@ -14,16 +16,16 @@ const logger = {
     }
   },
   debug(...args) {
-    if (shouldLog('debug')) console.debug('[DEBUG]', ...args);
+    if (shouldLog('debug')) console.debug(`[DEBUG] ${APP_NAME}:`, ...args);
   },
   info(...args) {
-    if (shouldLog('info')) console.info('[INFO]', ...args);
+    if (shouldLog('info')) console.info(`[INFO] ${APP_NAME}:`, ...args);
   },
   warn(...args) {
-    if (shouldLog('warn')) console.warn('[WARN]', ...args);
+    if (shouldLog('warn')) console.warn(`[WARN] ${APP_NAME}:`, ...args);
   },
   error(...args) {
-    if (shouldLog('error')) console.error('[ERROR]', ...args);
+    if (shouldLog('error')) console.error(`[ERROR] ${APP_NAME}:`, ...args);
   }
 };
 

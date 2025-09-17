@@ -170,7 +170,7 @@ async function shouldHideVideo(videoElement, topics = excludedTopics, threshold 
   for (const topic of topics) {
     try {
       const similarity = await calculateTopicSimilarity(topic, videoContext);
-      logger.debug(`[ConsciousYouTube] Context: "${videoContext}" | Topic: "${topic}" | Similarity: ${similarity}`);
+      logger.debug(`Context: "${videoContext}" | Topic: "${topic}" | Similarity: ${similarity}`);
       if (similarity >= threshold) {
         return true;
       }
@@ -233,7 +233,7 @@ function showVideo(videoElement) {
  */
 function clearProcessedVideosCache() {
   processedVideos = new WeakSet();
-  logger.info('Conscious YouTube: Cleared processed videos cache');
+  logger.info('Cleared processed videos cache');
 }
 
 /**
@@ -243,7 +243,7 @@ function clearProcessedVideosCache() {
 function deleteVideo(videoElement) {
   if (videoElement && videoElement.parentNode) {
     videoElement.parentNode.removeChild(videoElement);
-    logger.info('Conscious YouTube: Deleted video element');
+    logger.info('Deleted video element');
   }
 }
 
@@ -336,7 +336,7 @@ async function scanForVideos() {
           const topicEmbedding = topicEmbeddings[t];
           try {
             const similarity = cosineSimilarity(topicEmbedding, videoEmbedding);
-            logger.debug(`[ConsciousYouTube] Context: "${context}" | Topic: "${topic}" | Similarity: ${similarity}`);
+            logger.debug(`Context: "${context}" | Topic: "${topic}" | Similarity: ${similarity}`);
             if (similarity >= sensitivity) {
               shouldHide = true;
               break;
@@ -356,7 +356,7 @@ async function scanForVideos() {
         }
         processedVideos.add(videoElement);
       }
-      logger.info(`Conscious YouTube: Processed ${unprocessed.length} new videos (batched)`);
+      logger.info(`Processed ${unprocessed.length} new videos (batched)`);
     }
   } catch (error) {
     logger.error('Error scanning for videos:', error);
@@ -379,7 +379,7 @@ function debouncedScan() {
  * Initialize the Hide Unwanted Videos component
  */
 export async function initializeHideUnwantedContent() {
-  logger.info('Conscious YouTube: Hide Unwanted Videos component initializing');
+  logger.info('Hide Unwanted Videos component initializing');
 
   // Ensure embedding API is available before scanning
   await ensureEmbeddingApi();
@@ -395,7 +395,7 @@ export async function initializeHideUnwantedContent() {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
         await updateTopicEmbeddings();
-        logger.info('Conscious YouTube: Settings changed, clearing video cache for re-evaluation');
+        logger.info('Settings changed, clearing video cache for re-evaluation');
         // Re-scan when settings change
         debouncedScan();
       });

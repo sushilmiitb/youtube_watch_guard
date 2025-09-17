@@ -18,7 +18,7 @@ let youtubeShortsComponent = null;
  * Initialize all content script components
  */
 async function initialize() {
-  logger.info('Conscious YouTube: Content script initializing');
+  logger.info('Content script initializing');
 
   try {
     // Initialize all components
@@ -35,7 +35,7 @@ async function initialize() {
         if (hideUnwantedComponent && hideUnwantedComponent.clearProcessedVideosCache) {
           hideUnwantedComponent.clearProcessedVideosCache();
         }
-      logger.info('Conscious YouTube: Page changed, clearing video cache');
+      logger.info('Page changed, clearing video cache');
       // Small delay to let the new page load
         setTimeout(() => {
           if (hideUnwantedComponent && hideUnwantedComponent.scanForVideos) {

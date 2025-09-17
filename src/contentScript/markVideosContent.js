@@ -75,7 +75,7 @@ function setupMessageListeners() {
  * Initialize the Mark Videos Not Interested component
  */
 export function initializeMarkVideosContent() {
-  logger.info('Conscious YouTube: Mark Videos Not Interested component initializing');
+  logger.info('Mark Videos Not Interested component initializing');
 
   // Set up message listeners
   setupMessageListeners();
