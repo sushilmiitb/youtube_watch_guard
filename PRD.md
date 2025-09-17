@@ -43,3 +43,6 @@ As an end user, I should be able to tell the plugin to remove the youtube shorts
 ## Problem statement and high level solution
 In the home feed page, youtube allows us to mark certain videos as not interested. If we mark them as such, youtube algorithm takes a note of that and shows lesser of that type of content to us. The problem is that on day to day basis, we default to our unconscious behavior and youtube eventually start showing that contet back to us.
 We have already implemented some solution above to solve this. We can use this one more tool. Youtube does a categorization of the videos it is showing to us in the home feed. User can decide which topic he/she doesn't want to see, click those, and ask this tool to mark top 10 videos as not interested. The tool will remind regularly to the user to do this exercise again and again.
+
+## Remind user to check if unwanted videos have started coming again
+Set up an alarm of 7 days (configurable, but not exposed to the user). Whenever user visits youtube.com homepage, after 7 days, give a popup, reminding the user if he/she wants to check if unwanted videos have started coming up again. If yes, then request them to do the cleanup again.
