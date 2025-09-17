@@ -1,5 +1,5 @@
 import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
-import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode, isYouTubeFilterSetToAll } from './popupView.js';
+import { getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, renderTopics, renderTopicsCompact, setTopicEditMode } from './popupView.js';
 import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
 
 async function bootstrap() {
@@ -184,19 +184,6 @@ async function bootstrap() {
 
 document.addEventListener('DOMContentLoaded', bootstrap);
 
-/**
- * Check if the currently selected category filter in YouTube homepage is "All"
- * This is a wrapper function that uses the implementation from popupView.js
- * @returns {Promise<boolean>} True if "All" filter is selected, false otherwise
- */
-export async function checkIfYouTubeFilterIsAll() {
-  try {
-    return await isYouTubeFilterSetToAll();
-  } catch (error) {
-    console.error('Error checking YouTube filter state:', error);
-    return false;
-  }
-}
 
 // --- Not Interested Button Integration ---
 const notInterestedBtn = document.getElementById('not-interested-btn');
@@ -220,14 +207,14 @@ async function checkYouTubeHomepageAndSetButtonState() {
       return;
     }
     
-    // If we're on YouTube homepage, check the filter state
+    // If we're on YouTube homepage, check the filter state via message passing
     try {
-      const isFilterAll = await isYouTubeFilterSetToAll();
-      isFilterSetToAll = isFilterAll;
-      
-      if (isFilterAll) {
+      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getFilterState' });
+      if (response && response.isAll) {
+        isFilterSetToAll = true;
         setButtonDisabled('The "Mark now" feature only works when a specific category filter is selected. Please select a category other than "All" and try again.');
       } else {
+        isFilterSetToAll = false;
         setButtonEnabled();
       }
     } catch (error) {
