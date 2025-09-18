@@ -4,7 +4,7 @@ const {
   addTopic,
   editTopic,
   removeTopic
-} = require('../../topicsModel.js');
+} = require('../../src/popup/topicsModel.js');
 
 describe('topicsModel logic', () => {
   test('normalize trims and lowercases', () => {

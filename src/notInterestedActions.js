@@ -56,7 +56,7 @@ export async function markVideosNotInterested(count = 10) {
       processed++;
     }
     // 4. Wait a random delay before next video
-    await wait(randomBetween(1000, 3000));
+    await wait(randomBetween(0, 200));
   }
   console.info(`Processed ${processed} videos as 'Not interested'.`);
 }

@@ -104,6 +104,70 @@ npm run dev:content
 
 This will watch for changes and automatically rebuild the bundle.
 
+## Chrome Web Store Build Process
+
+This document explains how to build the extension for Chrome Web Store upload.
+
+### Quick Start
+
+#### For macOS/Linux:
+```bash
+./build-chrome-store.sh
+```
+
+#### For Windows:
+```cmd
+build-chrome-store.bat
+```
+
+### What the Build Script Does
+
+1. **Runs Build Commands:**
+   - `npm run build:css` - Builds and minifies the CSS using Tailwind
+   - `npm run build:content` - Bundles the content script using esbuild
+
+2. **Creates Build Directory:**
+   - Creates a `chrome-store-build/` folder
+   - Copies all required files and folders
+
+3. **Includes Required Files:**
+   - `dist/` folder (contains bundled content script)
+   - `images/` folder (extension icons)
+   - `src/` folder (source files needed by the extension)
+   - Root files: `content.js`, `manifest.json`, `popup.css`, `popup.html`, `popup.js`, `popupView.js`
+
+4. **Creates Zip File:**
+   - Automatically creates `youtube-watch-guard-chrome-store.zip` for easy upload
+
+### Output
+
+After running the build script, you'll have:
+
+- **Build Directory:** `chrome-store-build/` - Contains all files ready for upload
+- **Zip File:** `youtube-watch-guard-chrome-store.zip` - Ready for Chrome Web Store upload
+
+### Chrome Web Store Upload
+
+You can upload either:
+1. The zip file: `youtube-watch-guard-chrome-store.zip`
+2. The contents of the `chrome-store-build/` folder
+
+### Prerequisites
+
+Make sure you have:
+- Node.js installed
+- All dependencies installed (`npm install`)
+- The build scripts are executable (for Unix systems)
+
+### Troubleshooting
+
+- If the script fails, check that all required files exist
+- Ensure npm dependencies are installed
+- Make sure the build commands work individually:
+  - `npm run build:css`
+  - `npm run build:content`
+
+
 ## Technical Details
 
 - **Current Mode**: Test mode with mock embeddings

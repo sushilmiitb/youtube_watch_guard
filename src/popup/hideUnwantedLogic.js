@@ -3,7 +3,7 @@
  * Handles business logic, data management, and storage operations
  */
 
-import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from '../../topicsModel.js';
+import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
 import { 
   getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, 
   renderTopics, renderTopicsCompact, setTopicEditMode, setVideoAction, getVideoAction,

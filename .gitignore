@@ -13,6 +13,7 @@ node_modules/
 # Build output (if any)
 dist/
 build/
+chrome-store-build/
 
 # Extension package files (if you ever zip for upload)
 *.zip
