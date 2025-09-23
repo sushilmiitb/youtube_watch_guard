@@ -1,4 +1,4 @@
-# Conscious YouTube
+# YouTube Watch Guard
 
 ## Problem statement and objective
 Youtube gives content suggestions at different places. The content is optimized so that the user spends most of his/her time in youtube and not on the basis of what user consciously wants to see. There are some controls given by Youtube, like subscribe / unsubscribe, don’t recommend from this channel, don’t show this type of content, etc. But subconscious choice of watching behavior usually takes over the conscious choice of these loose controls. The objective is to help the user have a more conscious control on the youtube recommendations.
