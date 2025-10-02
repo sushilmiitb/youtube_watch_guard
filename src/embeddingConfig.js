@@ -24,6 +24,7 @@ export function setApiUrl(url) {
 // Auto-switch to production URL if not running on localhost
 if (ENV === 'production') {
     API_URL = 'https://genai-inference-api-160164613372.us-central1.run.app';
+    // API_URL = 'https://161.118.163.45:8080';
 }else {
     API_URL = 'http://127.0.0.1:8000';
 }

@@ -46,3 +46,16 @@ We have already implemented some solution above to solve this. We can use this o
 
 ## Remind user to check if unwanted videos have started coming again
 Set up an alarm of 7 days (configurable, but not exposed to the user). Whenever user visits youtube.com homepage, after 7 days, give a popup, reminding the user if he/she wants to check if unwanted videos have started coming up again. If yes, then request them to do the cleanup again.
+
+# Feature - Use Gemini to power semantic comparison
+Gemini (Gemini 2.5 Flash) has a free tier of 1000 requests per day and 60 requests per minute free tier.
+To take advantage of this, we can have the the following
+1. Build rate limiting logic switcher
+2. Build call to different AI models
+3. Call from
+    1. Client side --> Ask users to put API keys
+    2. From Oracle server --> Route the requests through Oracle servers
+To start with, I will do that from oracle servers only with rate limiting. Hoping that people will not exceed the free tier limit.
+
+Tasks
+* In fact, API can be the same, just the backend logic will change.
