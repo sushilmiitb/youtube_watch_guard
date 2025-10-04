@@ -229,8 +229,9 @@ function deleteVideo(videoElement) {
 function getVideoSelectorsForPage() {
   const url = window.location.href;
   if (/youtube\.com\/(results|search)/.test(url)) {
-    // Search page
-    return ['ytd-video-renderer', 'ytd-compact-video-renderer'];
+    // Search page - skip video processing
+    logger.debug('Search results page detected - skipping video processing');
+    return [];
   } else if (/youtube\.com\/watch/.test(url)) {
     // Watch/view page
     return ['ytm-shorts-lockup-view-model-v2', 'yt-lockup-view-model'];

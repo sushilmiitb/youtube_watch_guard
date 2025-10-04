@@ -11,6 +11,15 @@ let removeShortsSection = true;
 let hiddenElements = new WeakSet(); // Track elements we've hidden
 
 /**
+ * Check if we're on a search results page
+ * @returns {boolean} - True if on search results page
+ */
+function isSearchResultsPage() {
+  const url = window.location.href;
+  return /youtube\.com\/(results|search)/.test(url);
+}
+
+/**
  * Load Shorts section removal setting from storage
  */
 async function loadShortsSettings() {
@@ -27,6 +36,12 @@ async function loadShortsSettings() {
  */
 function showShortsSectionsFromDOM() {
   logger.debug('showShortsSectionsFromDOM called');
+  
+  // Skip processing on search results pages
+  if (isSearchResultsPage()) {
+    logger.debug('Search results page detected - skipping Shorts processing');
+    return;
+  }
   
   const selectors = [
     'ytd-rich-section-renderer',
@@ -56,6 +71,12 @@ function showShortsSectionsFromDOM() {
  */
 function removeShortsSectionsFromDOM() {
   logger.debug(`removeShortsSectionsFromDOM called, removeShortsSection: ${removeShortsSection}`);
+  
+  // Skip processing on search results pages
+  if (isSearchResultsPage()) {
+    logger.debug('Search results page detected - skipping Shorts processing');
+    return;
+  }
   
   if (removeShortsSection) {
     // Hide Shorts sections
