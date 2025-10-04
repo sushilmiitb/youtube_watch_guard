@@ -8,6 +8,7 @@ import { createSharedMutationObserver } from './mutationObserverUtils.js';
 
 // State management
 let removeShortsSection = true;
+let hiddenElements = new WeakSet(); // Track elements we've hidden
 
 /**
  * Load Shorts section removal setting from storage
@@ -22,32 +23,66 @@ async function loadShortsSettings() {
 }
 
 /**
- * Remove Shorts sections from the DOM if enabled
+ * Show previously hidden Shorts sections
  */
-function removeShortsSectionsFromDOM() {
-  logger.debug(`removeShortsSectionsFromDOM called, removeShortsSection: ${removeShortsSection}`);
-  if (!removeShortsSection) {
-    logger.debug('Shorts removal is disabled, skipping');
-    return;
-  }
+function showShortsSectionsFromDOM() {
+  logger.debug('showShortsSectionsFromDOM called');
   
   const selectors = [
     'ytd-rich-section-renderer',
     'ytd-reel-shelf-renderer'
   ];
-  let removedCount = 0;
+  let shownCount = 0;
   for (const selector of selectors) {
     const elements = document.querySelectorAll(selector);
     logger.debug(`Found ${elements.length} elements for selector: ${selector}`);
     elements.forEach(el => {
-      el.style.display = 'none';
-      removedCount++;
+      if (hiddenElements.has(el)) {
+        el.style.display = '';
+        hiddenElements.delete(el);
+        shownCount++;
+      }
     });
   }
-  if (removedCount > 0) {
-    logger.info(`Removed ${removedCount} Shorts section(s)`);
+  if (shownCount > 0) {
+    logger.info(`Showed ${shownCount} Shorts section(s)`);
   } else {
-    logger.debug('No Shorts sections found to remove');
+    logger.debug('No previously hidden Shorts sections found to show');
+  }
+}
+
+/**
+ * Remove or show Shorts sections from the DOM based on setting
+ */
+function removeShortsSectionsFromDOM() {
+  logger.debug(`removeShortsSectionsFromDOM called, removeShortsSection: ${removeShortsSection}`);
+  
+  if (removeShortsSection) {
+    // Hide Shorts sections
+    const selectors = [
+      'ytd-rich-section-renderer',
+      'ytd-reel-shelf-renderer'
+    ];
+    let removedCount = 0;
+    for (const selector of selectors) {
+      const elements = document.querySelectorAll(selector);
+      logger.debug(`Found ${elements.length} elements for selector: ${selector}`);
+      elements.forEach(el => {
+        if (el.style.display !== 'none') {
+          el.style.display = 'none';
+          hiddenElements.add(el);
+          removedCount++;
+        }
+      });
+    }
+    if (removedCount > 0) {
+      logger.info(`Removed ${removedCount} Shorts section(s)`);
+    } else {
+      logger.debug('No Shorts sections found to remove');
+    }
+  } else {
+    // Show previously hidden Shorts sections
+    showShortsSectionsFromDOM();
   }
 }
 
@@ -58,8 +93,8 @@ function setupShortsStorageListener() {
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.removeShortsSection) {
       loadShortsSettings().then(() => {
-        logger.info('Shorts section removal setting changed');
-        // Re-scan to apply new setting
+        logger.info(`Shorts section removal setting changed to: ${removeShortsSection}`);
+        // Apply new setting (hide or show based on new value)
         removeShortsSectionsFromDOM();
       });
     }
@@ -67,10 +102,10 @@ function setupShortsStorageListener() {
 }
 
 /**
- * Debounced removal function to avoid excessive processing
+ * Debounced function to avoid excessive processing
  */
 let removalTimeout = null;
-function debouncedRemoval() {
+function debouncedShortsAction() {
   if (removalTimeout) {
     clearTimeout(removalTimeout);
   }
@@ -104,7 +139,7 @@ export async function initializeYouTubeShortsContent() {
     'ytd-reel-shelf-renderer'
   ];
   
-  const observer = createSharedMutationObserver(shortsSelectors, debouncedRemoval, 250);
+  const observer = createSharedMutationObserver(shortsSelectors, debouncedShortsAction, 250);
   
   // Start observing
   observer.observe(document.body, {
@@ -114,6 +149,7 @@ export async function initializeYouTubeShortsContent() {
 
   return {
     removeShortsSectionsFromDOM,
-    debouncedRemoval
+    showShortsSectionsFromDOM,
+    debouncedShortsAction
   };
 }
