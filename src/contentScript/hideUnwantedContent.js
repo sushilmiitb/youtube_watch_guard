@@ -156,6 +156,7 @@ function extractVideoContext(videoElement) {
 function hideVideo(videoElement) {
   const context = extractVideoContext(videoElement);
   if (videoElement && !videoElement.classList.contains('conscious-youtube-hidden')) {
+    
     videoElement.classList.add('conscious-youtube-hidden');
     videoElement.style.opacity = '0.4';
     videoElement.style.pointerEvents = 'none';
@@ -178,6 +179,10 @@ function hideVideo(videoElement) {
     videoElement.style.position = 'relative';
     videoElement.appendChild(indicator);
   }
+  // Show the video if it's currently hidden with display: none
+  if (videoElement && videoElement.style.display === 'none') {
+    videoElement.style.removeProperty('display');
+  }
 }
 
 /**
@@ -192,6 +197,10 @@ function showVideo(videoElement) {
     // Remove indicator
     const indicator = videoElement.querySelector('.conscious-youtube-indicator');
     if (indicator) indicator.remove();
+  }
+  // Show the video if it's currently hidden with display: none
+  if (videoElement && videoElement.style.display === 'none') {
+    videoElement.style.removeProperty('display');
   }
 }
 
