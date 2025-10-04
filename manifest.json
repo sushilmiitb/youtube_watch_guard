@@ -34,6 +34,8 @@
       "resources": [
         "src/embeddingUtils.js",
         "src/embeddingConfig.js",
+        "src/classificationUtils.js",
+        "src/classificationConfig.js",
         "src/logger.js",
         "src/notInterestedActions.js"
       ],

@@ -1,51 +1,48 @@
 /**
  * Hide Unwanted Videos - Content Script Component
- * Handles video filtering based on topic similarity
+ * Handles video filtering based on topic classification
  */
 
 import logger from '../logger.js';
 import { createSharedMutationObserver } from './mutationObserverUtils.js';
 
 // Configuration
-const DEFAULT_SENSITIVITY = 0.3; // 30% default threshold
 const SCAN_INTERVAL = 5000; // Scan every 5 seconds
 const DEBOUNCE_DELAY = 250; // Debounce DOM changes
 
 // State management
 let excludedTopics = [];
-let sensitivity = DEFAULT_SENSITIVITY;
 let isScanning = false;
 let scanTimeout = null;
-let embeddingApi = null; // Loaded on demand
+let classificationApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
 let videoAction = 'delete'; // 'hide' or 'delete'
-let topicEmbeddings = [];
 
-// Import the embedding similarity function
-let calculateTopicSimilarity;
+// Import the classification functions
+let batchClassifyVideoContexts;
 
 /**
- * Ensure embedding API is loaded
+ * Ensure classification API is loaded
  */
-async function ensureEmbeddingApi() {
-  if (embeddingApi) return embeddingApi;
+async function ensureClassificationApi() {
+  if (classificationApi) return classificationApi;
   
   // In extension runtime, import via chrome.runtime URL
-  const url = chrome.runtime.getURL('src/embeddingUtils.js');
-  if (!url) throw new Error('Embedding module URL unavailable');
-  embeddingApi = await import(url);
-  calculateTopicSimilarity = embeddingApi.calculateTopicSimilarity;
-  return embeddingApi;
+  const url = chrome.runtime.getURL('src/classificationUtils.js');
+  if (!url) throw new Error('Classification module URL unavailable');
+  classificationApi = await import(url);
+  batchClassifyVideoContexts = classificationApi.batchClassifyVideoContexts;
+  return classificationApi;
 }
 
 /**
- * Get excluded topics and sensitivity from storage
+ * Get excluded topics and video action from storage
+ * Note: Sensitivity is no longer needed as Gen AI API handles confidence internally
  */
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(['topics', 'sensitivity', 'videoAction']);
+    const result = await chrome.storage.local.get(['topics', 'videoAction']);
     excludedTopics = result.topics || [];
-    sensitivity = result.sensitivity || DEFAULT_SENSITIVITY;
     videoAction = result.videoAction || 'delete';
   } catch (error) {
     logger.error('Failed to load settings:', error);
@@ -152,34 +149,6 @@ function extractVideoContext(videoElement) {
   }
 }
 
-/**
- * Determines if a video should be hidden based on its semantic similarity to excluded topics.
- * @param {Element} videoElement - The video element to evaluate.
- * @param {string[]} [topics] - An array of excluded topics to check against.
- * @param {number} [threshold] - The sensitivity threshold (0-1) for hiding.
- * @returns {Promise<boolean>} - True if the video should be hidden.
- */
-async function shouldHideVideo(videoElement, topics = excludedTopics, threshold = sensitivity) {
-  const videoContext = extractVideoContext(videoElement);
-  if (!videoContext) {
-    return false;
-  }
-  if (!calculateTopicSimilarity) {
-    await ensureEmbeddingApi();
-  }
-  for (const topic of topics) {
-    try {
-      const similarity = await calculateTopicSimilarity(topic, videoContext);
-      logger.debug(`Context: "${videoContext}" | Topic: "${topic}" | Similarity: ${similarity}`);
-      if (similarity >= threshold) {
-        return true;
-      }
-    } catch (e) {
-      logger.error('Error in similarity check:', e);
-    }
-  }
-  return false;
-}
 
 /**
  * Hide a video element by reducing opacity and disabling interactions
@@ -187,7 +156,6 @@ async function shouldHideVideo(videoElement, topics = excludedTopics, threshold 
  */
 function hideVideo(videoElement) {
   const context = extractVideoContext(videoElement);
-  logger.debug('hideVideo called for element:', videoElement, '| Context:', context);
   if (videoElement && !videoElement.classList.contains('conscious-youtube-hidden')) {
     videoElement.classList.add('conscious-youtube-hidden');
     videoElement.style.opacity = '0.4';
@@ -265,21 +233,12 @@ function getVideoSelectorsForPage() {
 }
 
 /**
- * Fetch and store embeddings for all excluded topics
+ * Initialize classification API (no longer needs to cache embeddings)
  */
-async function updateTopicEmbeddings() {
-  if (!embeddingApi) await ensureEmbeddingApi();
-  const { getBatchEmbeddings } = embeddingApi;
-  if (excludedTopics.length > 0) {
-    try {
-      topicEmbeddings = await getBatchEmbeddings(excludedTopics);
-      logger.info('Fetched topic embeddings for current topics.');
-    } catch (error) {
-      logger.error('Failed to fetch topic embeddings:', error);
-      topicEmbeddings = [];
-    }
-  } else {
-    topicEmbeddings = [];
+async function initializeClassificationApi() {
+  if (!classificationApi) {
+    await ensureClassificationApi();
+    logger.info('Classification API initialized.');
   }
 }
 
@@ -287,6 +246,7 @@ async function updateTopicEmbeddings() {
  * Scan the page for video elements and process them
  */
 async function scanForVideos() {
+  logger.debug('scanForVideos called');
   if (isScanning) return;
   isScanning = true;
 
@@ -298,7 +258,7 @@ async function scanForVideos() {
       const elements = document.querySelectorAll(selector);
       videoElements.push(...Array.from(elements));
     }
-
+    logger.debug('videoElements:', videoElements);
     // Collect unprocessed video elements and their contexts
     let unprocessed = [];
     for (const videoElement of videoElements) {
@@ -309,16 +269,21 @@ async function scanForVideos() {
       }
     }
 
-    if (unprocessed.length > 0 && excludedTopics.length > 0 && topicEmbeddings.length === excludedTopics.length) {
-      if (!embeddingApi) await ensureEmbeddingApi();
-      const { getBatchEmbeddings, cosineSimilarity } = embeddingApi;
+    if (unprocessed.length > 0 && excludedTopics.length > 0) {
+      logger.debug(`📋 Collected ${unprocessed.length} unprocessed videos:`);
+      logger.debug('unprocessed:', unprocessed);
+      
+      if (!classificationApi) await ensureClassificationApi();
       const contexts = unprocessed.map(item => item.context);
-      let videoEmbeddings = [];
+      let hideDecisions = [];
+      
       try {
-        // Batch fetch embeddings for all video contexts
-        videoEmbeddings = await getBatchEmbeddings(contexts);
+        // Batch classify all video contexts
+        logger.debug('contexts:', contexts);
+        hideDecisions = await batchClassifyVideoContexts(contexts, excludedTopics);
+        logger.debug('hideDecisions:', hideDecisions);
       } catch (error) {
-        logger.error('Batch embedding API failed:', error);
+        logger.error('Batch classification API failed:', error);
         // Mark as processed to avoid retry loop
         for (const { videoElement } of unprocessed) {
           processedVideos.add(videoElement);
@@ -326,25 +291,14 @@ async function scanForVideos() {
         isScanning = false;
         return;
       }
-      // For each video, check similarity with each topic embedding
+      
+      // Apply hide/show decisions based on classification results
       for (let i = 0; i < unprocessed.length; i++) {
         const { videoElement, context } = unprocessed[i];
-        const videoEmbedding = videoEmbeddings[i];
-        let shouldHide = false;
-        for (let t = 0; t < excludedTopics.length; t++) {
-          const topic = excludedTopics[t];
-          const topicEmbedding = topicEmbeddings[t];
-          try {
-            const similarity = cosineSimilarity(topicEmbedding, videoEmbedding);
-            logger.debug(`Context: "${context}" | Topic: "${topic}" | Similarity: ${similarity}`);
-            if (similarity >= sensitivity) {
-              shouldHide = true;
-              break;
-            }
-          } catch (e) {
-            logger.error('Error in similarity check:', e);
-          }
-        }
+        const shouldHide = hideDecisions[i];
+        
+        logger.debug(`🎬 Video ${i}: Context="${context}" → Decision=${shouldHide ? 'HIDE' : 'SHOW'}`, { index: i, videoElement });
+        
         if (shouldHide) {
           if (videoAction === 'delete') {
             deleteVideo(videoElement);
@@ -356,7 +310,7 @@ async function scanForVideos() {
         }
         processedVideos.add(videoElement);
       }
-      logger.info(`Processed ${unprocessed.length} new videos (batched)`);
+      logger.info(`Processed ${unprocessed.length} new videos (classification batch)`);
     }
   } catch (error) {
     logger.error('Error scanning for videos:', error);
@@ -381,29 +335,31 @@ function debouncedScan() {
 export async function initializeHideUnwantedContent() {
   logger.info('Hide Unwanted Videos component initializing');
 
-  // Ensure embedding API is available before scanning
-  await ensureEmbeddingApi();
+  // Ensure classification API is available before scanning
+  await ensureClassificationApi();
   
   // Load initial settings
   await loadSettings();
-  await updateTopicEmbeddings();
+  await initializeClassificationApi();
   
   // Set up storage change listener
   chrome.storage.onChanged.addListener((changes) => {
-    if (changes.topics || changes.sensitivity || changes.videoAction) {
+    if (changes.topics || changes.videoAction) {
       loadSettings().then(async () => {
         // Clear processed videos cache to re-evaluate with new settings
         clearProcessedVideosCache();
-        await updateTopicEmbeddings();
         logger.info('Settings changed, clearing video cache for re-evaluation');
         // Re-scan when settings change
         debouncedScan();
       });
     }
   });
+  logger.debug('Storage change listener set up');
 
   // Initial scan
   scanForVideos();
+
+  logger.debug('Initial scan completed');
 
   // Set up periodic scanning for dynamic content
   setInterval(debouncedScan, SCAN_INTERVAL);
@@ -430,7 +386,6 @@ export async function initializeHideUnwantedContent() {
     extractVideoTitle,
     extractChannelName,
     extractVideoContext,
-    shouldHideVideo,
     hideVideo,
     showVideo,
     deleteVideo
@@ -442,7 +397,6 @@ export {
   extractVideoTitle,
   extractChannelName,
   extractVideoContext,
-  shouldHideVideo,
   hideVideo,
   showVideo,
   deleteVideo,

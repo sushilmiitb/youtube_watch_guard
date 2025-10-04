@@ -40,10 +40,8 @@ function removeShortsSectionsFromDOM() {
     const elements = document.querySelectorAll(selector);
     logger.debug(`Found ${elements.length} elements for selector: ${selector}`);
     elements.forEach(el => {
-      if (el.parentNode) {
-        el.parentNode.removeChild(el);
-        removedCount++;
-      }
+      el.style.display = 'none';
+      removedCount++;
     });
   }
   if (removedCount > 0) {

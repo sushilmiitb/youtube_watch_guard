@@ -1,7 +1,7 @@
 // src/logger.js
 
 const LEVELS = ['debug', 'info', 'warn', 'error', 'none'];
-let currentLevel = 'error'; // Set the default log level here
+let currentLevel = 'debug'; // Set the default log level here
 
 function shouldLog(level) {
   return LEVELS.indexOf(level) >= LEVELS.indexOf(currentLevel);

@@ -22,9 +22,9 @@ async function initialize() {
 
   try {
     // Initialize all components
+    youtubeShortsComponent = await initializeYouTubeShortsContent();
     hideUnwantedComponent = await initializeHideUnwantedContent();
     markVideosComponent = initializeMarkVideosContent();
-    youtubeShortsComponent = await initializeYouTubeShortsContent();
 
   // Set up URL change listener for page navigation
   let currentUrl = window.location.href;
