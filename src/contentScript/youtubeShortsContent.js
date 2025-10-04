@@ -5,10 +5,12 @@
 
 import logger from '../logger.js';
 import { createSharedMutationObserver } from './mutationObserverUtils.js';
+import { showShortsToast } from './toastUtils.js';
 
 // State management
 let removeShortsSection = true;
 let hiddenElements = new WeakSet(); // Track elements we've hidden
+
 
 /**
  * Check if we're on a search results page
@@ -18,6 +20,7 @@ function isSearchResultsPage() {
   const url = window.location.href;
   return /youtube\.com\/(results|search)/.test(url);
 }
+
 
 /**
  * Load Shorts section removal setting from storage
@@ -98,6 +101,8 @@ function removeShortsSectionsFromDOM() {
     }
     if (removedCount > 0) {
       logger.info(`Removed ${removedCount} Shorts section(s)`);
+      // Show toast notification
+      showShortsToast(removedCount);
     } else {
       logger.debug('No Shorts sections found to remove');
     }

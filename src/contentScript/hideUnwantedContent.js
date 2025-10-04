@@ -5,6 +5,7 @@
 
 import logger from '../logger.js';
 import { createSharedMutationObserver } from './mutationObserverUtils.js';
+import { showVideoToast } from './toastUtils.js';
 
 // Configuration
 const SCAN_INTERVAL = 5000; // Scan every 5 seconds
@@ -17,6 +18,7 @@ let scanTimeout = null;
 let classificationApi = null; // Loaded on demand
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
 let videoAction = 'delete'; // 'hide' or 'delete'
+
 
 // Import the classification functions
 let batchClassifyVideoContexts;
@@ -212,6 +214,7 @@ function clearProcessedVideosCache() {
   logger.info('Cleared processed videos cache');
 }
 
+
 /**
  * Delete a video element from the DOM
  * @param {Element} videoElement - The video element to delete
@@ -302,6 +305,7 @@ async function scanForVideos() {
       }
       
       // Apply hide/show decisions based on classification results
+      let hiddenCount = 0;
       for (let i = 0; i < unprocessed.length; i++) {
         const { videoElement, context } = unprocessed[i];
         const shouldHide = hideDecisions[i];
@@ -314,11 +318,19 @@ async function scanForVideos() {
           } else {
             hideVideo(videoElement);
           }
+          hiddenCount++;
         } else {
           showVideo(videoElement);
         }
         processedVideos.add(videoElement);
       }
+      
+      // Show toast notification if videos were hidden/deleted
+      if (hiddenCount > 0) {
+        const action = videoAction === 'delete' ? 'deleted' : 'hidden';
+        showVideoToast(hiddenCount, action);
+      }
+      
       logger.info(`Processed ${unprocessed.length} new videos (classification batch)`);
     }
   } catch (error) {
