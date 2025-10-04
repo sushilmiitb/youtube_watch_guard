@@ -37,7 +37,6 @@ async function ensureClassificationApi() {
 
 /**
  * Get excluded topics and video action from storage
- * Note: Sensitivity is no longer needed as Gen AI API handles confidence internally
  */
 async function loadSettings() {
   try {
@@ -210,8 +209,8 @@ function clearProcessedVideosCache() {
  */
 function deleteVideo(videoElement) {
   if (videoElement && videoElement.parentNode) {
-    videoElement.parentNode.removeChild(videoElement);
-    logger.info('Deleted video element');
+    videoElement.style.display = 'none';
+    logger.info('Hidden video element');
   }
 }
 

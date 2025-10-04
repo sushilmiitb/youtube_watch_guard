@@ -17,10 +17,9 @@ export const clearProcessedVideosCache = hideUnwantedContent.clearProcessedVideo
  * Overrides the production version to always return true for testing DOM manipulation
  * @param {Element} videoElement - The video element to evaluate.
  * @param {string[]} [topics] - An array of excluded topics to check against.
- * @param {number} [threshold] - The sensitivity threshold (0-1) for hiding.
  * @returns {Promise<boolean>} - Always returns true in test mode.
  */
-export async function shouldHideVideo(videoElement, topics = [], threshold = 0.3) {
+export async function shouldHideVideo(videoElement, topics = []) {
   const context = extractVideoContext(videoElement);
   if (!context) {
     return false;

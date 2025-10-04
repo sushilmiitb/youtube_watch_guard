@@ -9,9 +9,7 @@ export function getElements() {
     input: document.getElementById('topic-input'),
     addBtn: document.getElementById('add-topic-btn'),
     list: document.getElementById('topic-list'),
-    error: document.getElementById('error-msg'),
-    sensitivitySlider: document.getElementById('sensitivity-slider'),
-    sensitivityValue: document.getElementById('sensitivity-value')
+    error: document.getElementById('error-msg')
   };
 }
 
@@ -34,22 +32,6 @@ export function getInput() {
   return input ? input.value : '';
 }
 
-export function getSensitivity() {
-  const { sensitivitySlider } = getElements();
-  if (sensitivitySlider) {
-    return parseInt(sensitivitySlider.value) / 100; // Convert percentage to decimal
-  }
-  return 0.3; // Default 30%
-}
-
-export function setSensitivity(value) {
-  const { sensitivitySlider, sensitivityValue } = getElements();
-  if (sensitivitySlider && sensitivityValue) {
-    const percentage = Math.round(value * 100);
-    sensitivitySlider.value = percentage;
-    sensitivityValue.textContent = `${percentage}%`;
-  }
-}
 
 export function renderTopics(topics, { editingIndex = null, onStartEdit, onConfirmEdit, onRemove }) {
   const { list } = getElements();
@@ -180,26 +162,6 @@ export function setupVideoActionListeners(onHideChange, onDeleteChange) {
   }
 }
 
-/**
- * Set up sensitivity slider listeners
- * @param {Function} onInput - Callback for slider input
- * @param {Function} onChange - Callback for slider change
- */
-export function setupSensitivityListeners(onInput, onChange) {
-  const { sensitivitySlider, sensitivityValue } = getElements();
-  
-  if (sensitivitySlider) {
-    sensitivitySlider.addEventListener('input', (e) => {
-      const percentage = e.target.value;
-      if (sensitivityValue) {
-        sensitivityValue.textContent = `${percentage}%`;
-      }
-      onInput(percentage);
-    });
-    
-    sensitivitySlider.addEventListener('change', onChange);
-  }
-}
 
 /**
  * Set up edit mode event listeners

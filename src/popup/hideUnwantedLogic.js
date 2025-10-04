@@ -5,9 +5,9 @@
 
 import { addTopic, editTopic, removeTopic, loadTopics, saveTopics } from './topicsModel.js';
 import { 
-  getElements, setError, clearError, setInput, getInput, getSensitivity, setSensitivity, 
+  getElements, setError, clearError, setInput, getInput, 
   renderTopics, renderTopicsCompact, setTopicEditMode, setVideoAction, getVideoAction,
-  setupVideoActionListeners, setupSensitivityListeners, setupEditModeListeners, setupAddTopicListeners,
+  setupVideoActionListeners, setupEditModeListeners, setupAddTopicListeners,
   areElementsAvailable
 } from './hideUnwantedView.js';
 import logger from '../logger.js';
@@ -73,15 +73,6 @@ export async function initializeHideUnwanted() {
     }
   );
 
-  // Load sensitivity from storage
-  try {
-    const result = await chrome.storage.local.get(['sensitivity']);
-    const savedSensitivity = result.sensitivity || 0.3;
-    setSensitivity(savedSensitivity);
-  } catch (error) {
-    logger.error('Failed to load sensitivity:', error);
-    setSensitivity(0.3); // Default
-  }
 
   const topicActionHandlers = {
     onStartEdit: (index) => {
@@ -129,15 +120,6 @@ export async function initializeHideUnwanted() {
     }
   }
 
-  async function handleSensitivityChange() {
-    const sensitivity = getSensitivity();
-    try {
-      await chrome.storage.local.set({ sensitivity });
-      logger.info('Sensitivity updated:', sensitivity);
-    } catch (error) {
-      logger.error('Failed to save sensitivity:', error);
-    }
-  }
 
   function handleKeydown(e) {
     if (e.key === 'Enter') {
@@ -149,12 +131,6 @@ export async function initializeHideUnwanted() {
   // Set up all event listeners
   setupEditModeListeners(showEditMode, showCompactMode);
   setupAddTopicListeners(handleAdd, handleKeydown);
-  setupSensitivityListeners(
-    (percentage) => {
-      // Input handler - already handled in view function
-    },
-    handleSensitivityChange
-  );
 
   // Initial render: compact mode
   showCompactMode();
@@ -164,7 +140,6 @@ export async function initializeHideUnwanted() {
   return {
     // Public methods for external access if needed
     getTopics: () => topics,
-    getVideoAction: () => videoAction,
-    getSensitivity: () => getSensitivity()
+    getVideoAction: () => videoAction
   };
 }
