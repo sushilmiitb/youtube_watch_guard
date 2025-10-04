@@ -122,7 +122,7 @@ function extractChannelName(videoElement) {
 }
 
 /**
- * Extract combined video context (title + channel name) for better embedding accuracy
+ * Extract combined video context (title + channel name) for better classification accuracy
  * @param {Element} videoElement - The video tile element
  * @returns {string|null} - Combined video context or null if neither found
  */
@@ -241,7 +241,7 @@ function getVideoSelectorsForPage() {
 }
 
 /**
- * Initialize classification API (no longer needs to cache embeddings)
+ * Initialize classification API
  */
 async function initializeClassificationApi() {
   if (!classificationApi) {

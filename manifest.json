@@ -32,8 +32,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "src/embeddingUtils.js",
-        "src/embeddingConfig.js",
         "src/classificationUtils.js",
         "src/classificationConfig.js",
         "src/logger.js",

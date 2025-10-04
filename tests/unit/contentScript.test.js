@@ -14,9 +14,9 @@ global.chrome = {
   }
 };
 
-// Mock embeddingUtils
-jest.mock('../../src/embeddingUtils.js', () => ({
-  calculateTopicSimilarity: jest.fn()
+// Mock classificationUtils
+jest.mock('../../src/classificationUtils.js', () => ({
+  batchClassifyVideoContexts: jest.fn()
 }));
 
 // Import the test utilities

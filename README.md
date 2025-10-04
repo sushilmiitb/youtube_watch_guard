@@ -39,7 +39,7 @@ Use the sensitivity slider to control how strict the filtering should be (not ac
 - **Lower values (0-30%)**: Only hide videos that are very similar to excluded topics
 - **Higher values (70-100%)**: Hide videos that are even remotely related to excluded topics
 
-### 4. Run the embeddings service
+### 4. Run the classification service
 https://github.com/sushilmiitb/genai_inference_apis_self_hosted
 
 ## How It Works (Test Mode)
@@ -68,7 +68,7 @@ npm test
 The test suite includes:
 - **Unit tests** for core logic (`topicsModel.js`, `popupView.js`)
 - **Content script tests** using test utilities (`tests/utils/contentScriptTestUtils.js`)
-- **Embedding utilities tests** for semantic similarity functions
+- **Classification utilities tests** for semantic similarity functions
 
 ### Test Architecture
 
@@ -170,9 +170,9 @@ Make sure you have:
 
 ## Technical Details
 
-- **Current Mode**: Test mode with mock embeddings
-- **Similarity Metric**: Cosine similarity (not used in test mode)
-- **Storage**: Chrome's local storage for topics and sensitivity
+- **Current Mode**: Test mode with mock classification
+- **Classification**: Direct text classification (not used in test mode)
+- **Storage**: Chrome's local storage for topics and settings
 - **Content Scripts**: Runs on YouTube pages to filter videos in real-time
 
 ## Troubleshooting
@@ -183,9 +183,9 @@ Make sure you have:
 
 ## Future Plans
 
-- Implement local HuggingFace embeddings for semantic filtering
+- Implement local HuggingFace models for semantic filtering
 - Remove test mode and enable actual topic-based filtering
-- Add more sophisticated similarity algorithms
+- Add more sophisticated classification algorithms
 
 ## License
 

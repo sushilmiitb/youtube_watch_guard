@@ -1,5 +1,5 @@
 // Text classification utilities for semantic topic matching
-// Batch processing only - replaces embedding-based similarity with direct classification
+// Batch processing for direct classification
 
 import { API_URL, CLASSIFICATION_ENDPOINT, MOCK_CLASSIFICATION_API_CALL, CLASSIFICATION_PROVIDER, CLASSIFICATION_MODEL_NAME } from './classificationConfig.js';
 import logger from './logger.js';

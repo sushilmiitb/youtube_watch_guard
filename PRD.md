@@ -20,17 +20,16 @@ Following is the intended behavior
     * Upon addition of a topic name, it gets saved in the local storage of chrome and immediately appears in the list in UI as well
     * User should not be able to add blank or duplicate topic names. Appropriate message should appear. Case of the input and whitespaces should not matter while checking for duplicates
 
-## User story: Filter content on the basis of semantic match of titles and topics using hugging face embeddings
+## User story: Filter content on the basis of semantic match of titles and topics using classification
 * As a user, I want that when I visit the youtube's homepage, the videos that belong to the topics I have entered in the exclude list, do not appear in my screen.
 
 ### Pros and cons
-Embeddings are cheap but do not have a very high accuracy. If we use LLM APIs, they are likely to be more accurate but will be costly.
+Classification APIs provide high accuracy for topic matching. Direct classification is more accurate than similarity-based approaches.
 
 ### Implementation details
-* Create a backend python service that can be self-hosted that returns embedings of the texts
-* In the extension, when the user visit either of the pages, retrieve the topics of all the video recommendations
-* Do a cosine match of the topics and video titles and if the match is higher then a threshold, disable the video recommendation.
-* Provide the user a way to adjust the threshold in the UI
+* Create a backend python service that can be self-hosted that provides classification endpoints
+* In the extension, when the user visit either of the pages, retrieve the titles of all the video recommendations
+* Use classification API to determine if videos match excluded topics and hide them accordingly
 * Provide the UI for the user to decide if he/she wants to disable the video recommendation or remove it completely. Implement the removal part.
 
 # Feature - remove youtube recommendation section

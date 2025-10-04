@@ -7,7 +7,7 @@ import { initializeHideUnwanted } from './src/popup/hideUnwantedLogic.js';
 import { initializeYouTubeShorts } from './src/popup/youtubeShortsLogic.js';
 import { initializeMarkVideos } from './src/popup/markVideosLogic.js';
 import { renderTestModeIndicator } from './popupView.js';
-import { MOCK_EMBEDDING_API_CALL } from './src/embeddingConfig.js';
+import { MOCK_CLASSIFICATION_API_CALL } from './src/classificationConfig.js';
 import logger from './src/logger.js';
 
 /**
@@ -21,7 +21,7 @@ async function bootstrap() {
     const markVideos = await initializeMarkVideos();
 
     // Dynamically show test mode indicator if needed
-    renderTestModeIndicator(MOCK_EMBEDDING_API_CALL);
+    renderTestModeIndicator(MOCK_CLASSIFICATION_API_CALL);
 
     logger.info('All popup components initialized successfully');
     
