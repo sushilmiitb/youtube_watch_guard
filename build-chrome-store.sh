@@ -7,6 +7,40 @@ set -e  # Exit on any error
 
 echo "🚀 Starting Chrome Web Store build process..."
 
+# Check if we're in production environment
+echo "🔍 Checking environment configuration..."
+
+# Check ENV in classificationConfig.js
+if ! grep -q "export const ENV = 'production';" src/classificationConfig.js; then
+    echo "❌ Error: ENV is not set to 'production' in src/classificationConfig.js"
+    echo "   Current setting in classificationConfig.js:"
+    grep "export const ENV" src/classificationConfig.js || echo "   No ENV found in classificationConfig.js"
+    echo "   Please set ENV = 'production' in src/classificationConfig.js for production builds"
+    exit 1
+fi
+
+# Check MOCK_CLASSIFICATION_API_CALL in classificationConfig.js
+if ! grep -q "export const MOCK_CLASSIFICATION_API_CALL = false;" src/classificationConfig.js; then
+    echo "❌ Error: MOCK_CLASSIFICATION_API_CALL is not set to 'false' in src/classificationConfig.js"
+    echo "   Current setting in classificationConfig.js:"
+    grep "export const MOCK_CLASSIFICATION_API_CALL" src/classificationConfig.js || echo "   No MOCK_CLASSIFICATION_API_CALL found in classificationConfig.js"
+    echo "   Please set MOCK_CLASSIFICATION_API_CALL = false in src/classificationConfig.js for production builds"
+    exit 1
+fi
+
+# Check logging level in logger.js
+echo "🔍 Checking logging configuration..."
+if ! grep -q "let currentLevel = 'error';" src/logger.js; then
+    echo "❌ Error: Logging level is not set to 'error' in src/logger.js"
+    echo "   Current setting in logger.js:"
+    grep "let currentLevel =" src/logger.js || echo "   No currentLevel found in logger.js"
+    echo "   Please set currentLevel = 'error' in src/logger.js for production builds"
+    exit 1
+fi
+
+echo "✅ Environment and logging checks passed!"
+echo ""
+
 # Define build directory name
 BUILD_DIR="chrome-store-build"
 EXTENSION_NAME="youtube-watch-guard"
@@ -84,3 +118,9 @@ echo "🚀 Ready for Chrome Web Store upload!"
 echo "   You can either:"
 echo "   1. Upload the zip file: ${EXTENSION_NAME}-chrome-store.zip"
 echo "   2. Or upload the folder contents from: $BUILD_DIR/"
+echo ""
+echo "📝 Production build completed with:"
+echo "   ✅ ENV=production in classificationConfig.js"
+echo "   ✅ MOCK_CLASSIFICATION_API_CALL=false"
+echo "   ✅ Logging level set to 'error'"
+echo "   ✅ All debug information removed"

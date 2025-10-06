@@ -5,7 +5,7 @@
  * If false, real API calls are made for text classification.
  */
 export const MOCK_CLASSIFICATION_API_CALL = false; // Set to true for testing, false for production
-export const ENV = 'development';
+export const ENV = 'production';
 
 /**
  * The base URL of the backend classification API server.
@@ -23,7 +23,8 @@ export function setApiUrl(url) {
 
 // Auto-switch to production URL if not running on localhost
 if (ENV === 'production') {
-    API_URL = 'https://genai-inference-api-160164613372.us-central1.run.app';
+    // API_URL = 'https://genai-inference-api-160164613372.us-central1.run.app';
+    API_URL = 'https://sattvium.ddns.net';
     // API_URL = 'https://161.118.163.45:8080';
 } else {
     API_URL = 'http://127.0.0.1:8000';
