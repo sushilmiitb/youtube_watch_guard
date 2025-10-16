@@ -9,7 +9,7 @@ import {
   CLASSIFICATION_PROVIDER, 
   CLASSIFICATION_MODEL_NAME,
   MOCK_CLASSIFICATION_API_CALL 
-} from '../classificationConfig.js';
+} from './classificationConfig.js';
 import logger from '../logger.js';
 
 /**

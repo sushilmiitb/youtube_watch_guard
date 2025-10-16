@@ -33,9 +33,9 @@
     {
       "resources": [
         "src/contentScript/classificationUtils.js",
+        "src/contentScript/classificationConfig.js",
         "src/contentScript/textClassifier.js",
         "src/contentScript/textClassifierServer.js",
-        "src/classificationConfig.js",
         "src/logger.js",
         "src/notInterestedActions.js"
       ],

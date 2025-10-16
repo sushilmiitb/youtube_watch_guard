@@ -44,3 +44,4 @@ export const CLASSIFICATION_PROVIDER = 'GEMINI';
  * AI model name for text classification
  */
 export const CLASSIFICATION_MODEL_NAME = 'gemini-2.5-flash';
+

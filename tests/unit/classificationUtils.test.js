@@ -15,7 +15,7 @@ global.fetch = jest.fn();
 global.mockClassify = jest.fn();
 
 // Mock the config to disable mock mode for API testing
-jest.mock('../../src/classificationConfig.js', () => ({
+jest.mock('../../src/contentScript/classificationConfig.js', () => ({
   API_URL: 'http://test-api.com',
   CLASSIFICATION_ENDPOINT: '/classify_texts',
   MOCK_CLASSIFICATION_API_CALL: false, // Disable mock mode for API testing
