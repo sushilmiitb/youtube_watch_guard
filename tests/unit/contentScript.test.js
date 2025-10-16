@@ -15,7 +15,7 @@ global.chrome = {
 };
 
 // Mock classificationUtils
-jest.mock('../../src/classificationUtils.js', () => ({
+jest.mock('../../src/contentScript/classificationUtils.js', () => ({
   batchClassifyVideoContexts: jest.fn()
 }));
 

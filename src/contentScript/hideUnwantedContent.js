@@ -6,6 +6,7 @@
 import logger from '../logger.js';
 import { createSharedMutationObserver } from './mutationObserverUtils.js';
 import { showVideoToast } from './toastUtils.js';
+import { batchClassifyVideoContexts } from './classificationUtils.js';
 
 // Configuration
 const SCAN_INTERVAL = 5000; // Scan every 5 seconds
@@ -15,27 +16,9 @@ const DEBOUNCE_DELAY = 250; // Debounce DOM changes
 let excludedTopics = [];
 let isScanning = false;
 let scanTimeout = null;
-let classificationApi = null; // Loaded on demand
+let textClassifier = null; // Injected text classifier instance (dependency injection)
 let processedVideos = new WeakSet(); // Track processed video elements to avoid duplicates
 let videoAction = 'delete'; // 'hide' or 'delete'
-
-
-// Import the classification functions
-let batchClassifyVideoContexts;
-
-/**
- * Ensure classification API is loaded
- */
-async function ensureClassificationApi() {
-  if (classificationApi) return classificationApi;
-  
-  // In extension runtime, import via chrome.runtime URL
-  const url = chrome.runtime.getURL('src/classificationUtils.js');
-  if (!url) throw new Error('Classification module URL unavailable');
-  classificationApi = await import(url);
-  batchClassifyVideoContexts = classificationApi.batchClassifyVideoContexts;
-  return classificationApi;
-}
 
 /**
  * Get excluded topics and video action from storage
@@ -245,16 +228,6 @@ function getVideoSelectorsForPage() {
 }
 
 /**
- * Initialize classification API
- */
-async function initializeClassificationApi() {
-  if (!classificationApi) {
-    await ensureClassificationApi();
-    logger.info('Classification API initialized.');
-  }
-}
-
-/**
  * Scan the page for video elements and process them
  */
 async function scanForVideos() {
@@ -281,18 +254,17 @@ async function scanForVideos() {
       }
     }
 
-    if (unprocessed.length > 0 && excludedTopics.length > 0) {
+    if (unprocessed.length > 0 && excludedTopics.length > 0 && textClassifier) {
       logger.debug(`📋 Collected ${unprocessed.length} unprocessed videos:`);
       logger.debug('unprocessed:', unprocessed);
       
-      if (!classificationApi) await ensureClassificationApi();
       const contexts = unprocessed.map(item => item.context);
       let hideDecisions = [];
       
       try {
-        // Batch classify all video contexts
+        // Batch classify all video contexts using injected classifier
         logger.debug('contexts:', contexts);
-        hideDecisions = await batchClassifyVideoContexts(contexts, excludedTopics);
+        hideDecisions = await batchClassifyVideoContexts(textClassifier, contexts, excludedTopics);
         logger.debug('hideDecisions:', hideDecisions);
       } catch (error) {
         logger.error('Batch classification API failed:', error);
@@ -352,16 +324,22 @@ function debouncedScan() {
 
 /**
  * Initialize the Hide Unwanted Videos component
+ * @param {Object} classifier - Text classifier instance (dependency injection)
+ *   Must have classify(texts, topics) method that returns Promise<Array<{text_id: string, topic_ids: string[]}>>
  */
-export async function initializeHideUnwantedContent() {
+export async function initializeHideUnwantedContent(classifier) {
   logger.info('Hide Unwanted Videos component initializing');
 
-  // Ensure classification API is available before scanning
-  await ensureClassificationApi();
+  if (!classifier) {
+    throw new Error('Text classifier instance is required');
+  }
+
+  // Store the injected classifier
+  textClassifier = classifier;
+  logger.debug('Text classifier injected successfully');
   
   // Load initial settings
   await loadSettings();
-  await initializeClassificationApi();
   
   // Set up storage change listener
   chrome.storage.onChanged.addListener((changes) => {

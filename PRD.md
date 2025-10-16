@@ -58,3 +58,69 @@ To start with, I will do that from oracle servers only with rate limiting. Hopin
 
 Tasks
 * In fact, API can be the same, just the backend logic will change.
+
+# Feature - Implement Chrome Built in AI for inference
+Chrome provides an inbuilt AI for inference, that can be used.
+
+Flow
+* Model download
+    * Upon installation, set up some badge to intice user to click the popup
+    * Upon first popup click, run through installation instruction screens that adds first topic list and starts the download of the model. On subsequent popup opens, show current popup screen.
+    * For folks who don't open popup upon installation or update
+        * Whenever content script runs, check from storage if
+            * If it is first time running --> Ask user to open the popup and download AI model
+            * If the user has added zero topics or hasn't yet downloaded the model, remind the user 3 times, in 3 days, to go to the popup and add the topics
+        
+
+Writing interfaces
+-- serviceWorker.js
+    -- initialize()
+    -- messageHandler()
+        -- updatePopupActionBadge() -- see if popup action requires attention
+
+-- popup.js:
+    -- ifInstallationScreenNeedsToBeShown() - using ai.languageModel.availability();
+    -- showInstallationScreen() - show a UI that prompts the users to go to the installation screen
+    -- showDefaultScreen()
+-- src/popup/clientAIInstallation.html -- write the html here. Only manage show/hide of various elements in the JS.
+-- src/popup/clientAIInstallation.js
+    -- showPopupHTMLView() -- To let users to first mention the topics they don't want to see -- implement this in popup.html itself. If installation is needed, use query parameter to show the next page. Upon clicking the next page, showStartDownloadView can start.
+    -- showStartDownloadView()
+        -- showDownloadingView() -- Show download progress using 
+            const session = await LanguageModel.create({
+                monitor(m) {
+                    m.addEventListener('downloadprogress', (e) => {
+                    console.log(`Downloaded ${e.loaded * 100}%`);
+                    });
+                },
+            });
+    -- downloadModel() -- ai.languageModel.create()
+    -- showDownloadCompleteView() -- show this view even when the platform is accessed
+
+content.js
+    -- initialize(): call routeInitialization
+    -- routeInitialization(): Check if local model is available and then initialize accordingly.
+    -- getTextClassifier(): Determines if local AI needs to handle the classification or external. It will be used in initialize(), to get the classifier and hideUnwantedContent will be called with the dependency injection
+    -- messageHandler()
+        -- send message to serviceWorker to update the badge
+
+
+src/contentScript/localAITextClassifier.js: This function will send message to the background scrirpt
+    -- initialize()
+    -- getBatchTextClassification(texts, topics)
+        -- arguments
+            -- texts: List of 
+                -- id: string
+                -- text: string
+            -- topics: List of
+                -- id: string
+                -- topic: string
+        -- returns: list of
+            -- text_id: 
+            -- topic_ids: list of topic ids / can be empty
+    -- buildPrompt(texts, topics)
+
+
+src/backgroundScript/localAITextClassifier.js
+
+*** First implement using the model only assuming it exists else use the cloud. No downloading needed ***

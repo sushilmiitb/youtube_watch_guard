@@ -6,6 +6,7 @@
 import { initializeHideUnwantedContent } from './src/contentScript/hideUnwantedContent.js';
 import { initializeMarkVideosContent } from './src/contentScript/markVideosContent.js';
 import { initializeYouTubeShortsContent } from './src/contentScript/youtubeShortsContent.js';
+import { getTextClassifier } from './src/contentScript/textClassifier.js';
 import logger from './src/logger.js';
 
 // Component instances
@@ -21,9 +22,13 @@ async function initialize() {
   logger.info('Content script initializing');
 
   try {
-    // Initialize all components
+    // Get the text classifier instance (dependency injection)
+    const textClassifier = await getTextClassifier();
+    logger.debug('Text classifier obtained');
+    
+    // Initialize all components with dependencies
     youtubeShortsComponent = await initializeYouTubeShortsContent();
-    hideUnwantedComponent = await initializeHideUnwantedContent();
+    hideUnwantedComponent = await initializeHideUnwantedContent(textClassifier);
     markVideosComponent = initializeMarkVideosContent();
 
   // Set up URL change listener for page navigation
