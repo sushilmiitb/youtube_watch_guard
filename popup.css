@@ -10599,10 +10599,6 @@ html:has(.drawer-open.drawer-open) {
   -moz-osx-font-smoothing: auto;
 }
 
-.opacity-100 {
-  opacity: 1;
-}
-
 .bg-blend-normal {
   background-blend-mode: normal;
 }

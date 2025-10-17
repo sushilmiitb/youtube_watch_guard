@@ -7,7 +7,7 @@ import { initializeHideUnwanted } from './src/popup/hideUnwantedLogic.js';
 import { initializeYouTubeShorts } from './src/popup/youtubeShortsLogic.js';
 import { initializeMarkVideos } from './src/popup/markVideosLogic.js';
 import { renderTestModeIndicator } from './popupView.js';
-import { MOCK_CLASSIFICATION_API_CALL } from './src/classificationConfig.js';
+import { MOCK_CLASSIFICATION_API_CALL } from './src/contentScript/textClassifierServer.js';
 import logger from './src/logger.js';
 
 /**

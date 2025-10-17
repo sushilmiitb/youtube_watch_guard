@@ -9,6 +9,10 @@
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   },
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -33,9 +37,9 @@
     {
       "resources": [
         "src/contentScript/classificationUtils.js",
-        "src/contentScript/classificationConfig.js",
         "src/contentScript/textClassifier.js",
         "src/contentScript/textClassifierServer.js",
+        "src/contentScript/textClassifierBuiltinAI.js",
         "src/logger.js",
         "src/notInterestedActions.js"
       ],

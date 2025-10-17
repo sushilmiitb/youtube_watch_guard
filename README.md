@@ -175,6 +175,25 @@ Make sure you have:
 - **Storage**: Chrome's local storage for topics and settings
 - **Content Scripts**: Runs on YouTube pages to filter videos in real-time
 
+## Text Classification Implementation
+
+The extension supports two classification methods:
+
+### Server-Based Classification (Current Default)
+- Uses remote API endpoint for text classification
+- Fast and reliable performance
+- Requires running the classification service: https://github.com/sushilmiitb/genai_inference_apis_self_hosted
+
+### Chrome Built-in AI (Experimental)
+Chrome's Prompt API with Gemini Nano has been implemented but is not currently in use due to performance constraints:
+
+**Implementation Status:**
+- ✅ **Batch Mode**: Processes all texts in one prompt - Model gets confused with large prompts, low accuracy
+- ✅ **Sequential Mode**: One session, processes texts one-by-one - Takes 30-40s (10s model load + 700ms/text)
+- ✅ **Parallel Mode**: Multiple concurrent sessions - Too resource-intensive (20GB+ RAM)
+
+**Current Decision:** Using server-based classification for optimal performance and accuracy. Built-in AI code is preserved in `src/serviceWorker/textClassifierBuiltInAI.js` for future improvements.
+
 ## Troubleshooting
 
 - **Extension not working**: Check the browser console for any error messages

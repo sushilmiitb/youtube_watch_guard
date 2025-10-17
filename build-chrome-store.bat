@@ -7,25 +7,25 @@ echo 🚀 Starting Chrome Web Store build process...
 REM Check if we're in production environment
 echo 🔍 Checking environment configuration...
 
-REM Check ENV in classificationConfig.js
-findstr /C:"export const ENV = 'production';" src\classificationConfig.js >nul
+REM Check ENV in textClassifierServer.js
+findstr /C:"export const ENV = 'production';" src\contentScript\textClassifierServer.js >nul
 if errorlevel 1 (
-    echo ❌ Error: ENV is not set to 'production' in src\classificationConfig.js
-    echo    Current setting in classificationConfig.js:
-    findstr "export const ENV" src\classificationConfig.js
-    if errorlevel 1 echo    No ENV found in classificationConfig.js
-    echo    Please set ENV = 'production' in src\classificationConfig.js for production builds
+    echo ❌ Error: ENV is not set to 'production' in src\contentScript\textClassifierServer.js
+    echo    Current setting in textClassifierServer.js:
+    findstr "export const ENV" src\contentScript\textClassifierServer.js
+    if errorlevel 1 echo    No ENV found in textClassifierServer.js
+    echo    Please set ENV = 'production' in src\contentScript\textClassifierServer.js for production builds
     exit /b 1
 )
 
-REM Check MOCK_CLASSIFICATION_API_CALL in classificationConfig.js
-findstr /C:"export const MOCK_CLASSIFICATION_API_CALL = false;" src\classificationConfig.js >nul
+REM Check MOCK_CLASSIFICATION_API_CALL in textClassifierServer.js
+findstr /C:"export const MOCK_CLASSIFICATION_API_CALL = false;" src\contentScript\textClassifierServer.js >nul
 if errorlevel 1 (
-    echo ❌ Error: MOCK_CLASSIFICATION_API_CALL is not set to 'false' in src\classificationConfig.js
-    echo    Current setting in classificationConfig.js:
-    findstr "export const MOCK_CLASSIFICATION_API_CALL" src\classificationConfig.js
-    if errorlevel 1 echo    No MOCK_CLASSIFICATION_API_CALL found in classificationConfig.js
-    echo    Please set MOCK_CLASSIFICATION_API_CALL = false in src\classificationConfig.js for production builds
+    echo ❌ Error: MOCK_CLASSIFICATION_API_CALL is not set to 'false' in src\contentScript\textClassifierServer.js
+    echo    Current setting in textClassifierServer.js:
+    findstr "export const MOCK_CLASSIFICATION_API_CALL" src\contentScript\textClassifierServer.js
+    if errorlevel 1 echo    No MOCK_CLASSIFICATION_API_CALL found in textClassifierServer.js
+    echo    Please set MOCK_CLASSIFICATION_API_CALL = false in src\contentScript\textClassifierServer.js for production builds
     exit /b 1
 )
 
@@ -146,7 +146,7 @@ echo 🚀 Ready for Chrome Web Store upload!
 echo    You can upload the folder contents from: %BUILD_DIR%\
 echo.
 echo 📝 Production build completed with:
-echo    ✅ ENV=production in classificationConfig.js
+echo    ✅ ENV=production in textClassifierServer.js
 echo    ✅ MOCK_CLASSIFICATION_API_CALL=false
 echo    ✅ Logging level set to 'error'
 echo    ✅ All debug information removed

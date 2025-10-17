@@ -14,14 +14,14 @@ jest.mock('../../src/contentScript/textClassifierServer.js', () => ({
 global.fetch = jest.fn();
 global.mockClassify = jest.fn();
 
-// Mock the config to disable mock mode for API testing
-jest.mock('../../src/contentScript/classificationConfig.js', () => ({
-  API_URL: 'http://test-api.com',
-  CLASSIFICATION_ENDPOINT: '/classify_texts',
-  MOCK_CLASSIFICATION_API_CALL: false, // Disable mock mode for API testing
-  CLASSIFICATION_PROVIDER: 'GEMINI',
-  CLASSIFICATION_MODEL_NAME: 'gemini-2.5-flash',
-}));
+// Mock the server text classifier module to disable mock mode for API testing
+jest.mock('../../src/contentScript/textClassifierServer.js', () => {
+  const originalModule = jest.requireActual('../../src/contentScript/textClassifierServer.js');
+  return {
+    ...originalModule,
+    MOCK_CLASSIFICATION_API_CALL: false, // Disable mock mode for API testing
+  };
+});
 
 describe('classificationUtils', () => {
   let mockClassifier;
